@@ -6,6 +6,8 @@ import { FACT_DEFS, getEventType, type FactKey } from "@/lib/events/taxonomy";
 import { newId } from "@/lib/ids";
 import { retrievePassages } from "@/lib/retrieval/hybrid";
 import { findCantonsInText } from "@/lib/swiss/cantons";
+import { localisedFactQuestion } from "@/lib/i18n/facts";
+import type { Locale } from "@/lib/i18n";
 import { evaluateRules } from "@/lib/rules/engine";
 import type { ConditionNode, DeadlineSpec, RuleDef, TaskTemplate } from "@/lib/rules/types";
 
@@ -107,17 +109,8 @@ async function planClarifications(
   return selected.slice(0, 4);
 }
 
-function questionsFor(factKeys: FactKey[]) {
-  return factKeys.map((fact) => {
-    const def = FACT_DEFS[fact];
-    return {
-      fact,
-      question: def.question,
-      whyWeAsk: def.whyWeAsk,
-      options: def.options,
-      input: def.input,
-    };
-  });
+function questionsFor(factKeys: FactKey[], locale: Locale) {
+  return factKeys.map((fact) => localisedFactQuestion(fact, locale));
 }
 
 /** Entry point for a new natural-language query. */
@@ -183,7 +176,12 @@ export async function processQuery(
 
   if (pending.length > 0) {
     await track("clarification_asked", { eventType: def.id, count: pending.length });
-    return { kind: "clarify", eventId, eventTitle: def.title, questions: questionsFor(pending) };
+    return {
+      kind: "clarify",
+      eventId,
+      eventTitle: def.title,
+      questions: questionsFor(pending, classification.language),
+    };
   }
 
   await generateChecklist(eventId);
@@ -227,7 +225,7 @@ export async function submitClarifications(
       kind: "clarify",
       eventId,
       eventTitle: event.title,
-      questions: questionsFor(pending),
+      questions: questionsFor(pending, event.language),
     };
   }
 

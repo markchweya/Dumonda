@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CornerDownLeft, Loader2 } from "lucide-react";
 import { Button, Card, Input, cn } from "@/components/ui";
+import { t, type Locale } from "@/lib/i18n";
 
 interface Question {
   fact: string;
@@ -21,7 +22,15 @@ interface AskResponse {
   message?: string;
 }
 
-export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery?: string; autoStart?: boolean }) {
+export function AskFlow({
+  initialQuery = "",
+  autoStart = false,
+  locale = "en",
+}: {
+  initialQuery?: string;
+  autoStart?: boolean;
+  locale?: Locale;
+}) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [phase, setPhase] = useState<"input" | "clarify" | "generating" | "unrecognised">("input");
@@ -103,7 +112,7 @@ export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery
     return (
       <Card className="mx-auto max-w-xl p-8 text-center">
         <Loader2 className="mx-auto h-6 w-6 animate-spin text-ink-soft" />
-        <p className="mt-4 text-sm text-ink-soft">Building your checklist from verified sources…</p>
+        <p className="mt-4 text-sm text-ink-soft">{t(locale, "ask.generating")}</p>
       </Card>
     );
   }
@@ -115,7 +124,7 @@ export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery
           {eventTitle ?? "One moment"}
         </p>
         <h2 className="mt-1 text-lg font-semibold">
-          {questions.length === 1 ? "We need one more detail" : "A few details change the answer"}
+          {questions.length === 1 ? t(locale, "ask.oneMoreDetail") : t(locale, "ask.fewDetails")}
         </h2>
         <div className="mt-6 space-y-6">
           {questions.map((q) => (
@@ -146,7 +155,7 @@ export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery
                     type={q.input === "date" ? "date" : "text"}
                     value={answers[q.fact] ?? ""}
                     onChange={(e) => setAnswers((a) => ({ ...a, [q.fact]: e.target.value }))}
-                    placeholder={q.input === "date" ? undefined : "Type your answer"}
+                    placeholder={q.input === "date" ? undefined : t(locale, "ask.typeAnswer")}
                   />
                 </div>
               )}
@@ -159,11 +168,11 @@ export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery
             className="text-sm text-ink-soft hover:text-ink transition-colors cursor-pointer"
             onClick={() => setPhase("input")}
           >
-            Start over
+            {t(locale, "ask.startOver")}
           </button>
           <Button onClick={submitAnswers} disabled={!allAnswered || loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Continue
+            {t(locale, "ask.continue")}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
@@ -190,18 +199,18 @@ export function AskFlow({ initialQuery = "", autoStart = false }: { initialQuery
               }
             }}
             rows={2}
-            placeholder="e.g. I moved to Basel last week…"
+            placeholder={t(locale, "ask.placeholder")}
             className="w-full resize-none bg-transparent px-3 py-2.5 text-base outline-none placeholder:text-ink-soft/50"
             aria-label="What's happening?"
           />
           <div className="flex items-center justify-between px-3 pb-1.5">
             <span className="hidden sm:flex items-center gap-1.5 text-xs text-ink-soft/70">
               <CornerDownLeft className="h-3 w-3" />
-              Enter to send
+              {t(locale, "ask.enterToSend")}
             </span>
             <Button type="submit" disabled={loading || !query.trim()}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Show me what to do
+              {t(locale, "ask.submit")}
             </Button>
           </div>
         </div>

@@ -69,31 +69,21 @@ export class DeterministicProvider implements AIProvider {
   async generateAnswer(ctx: AnswerContext): Promise<GeneratedAnswer> {
     const required = ctx.tasks.filter((t) => t.priority === "required").length;
     const conditional = ctx.tasks.filter((t) => t.priority === "may_apply").length;
+    const lang = ctx.language;
+    const tpl = SUMMARY_TEMPLATES[lang] ?? SUMMARY_TEMPLATES.en;
 
     const parts: string[] = [];
-    parts.push(
-      `Based on your situation, we identified ${ctx.tasks.length} ${ctx.tasks.length === 1 ? "step" : "steps"}` +
-        (required > 0 ? `, ${required} of ${required === 1 ? "which is" : "which are"} official obligations` : "") +
-        ".",
-    );
-    if (conditional > 0) {
-      parts.push(
-        `${conditional} ${conditional === 1 ? "item depends" : "items depend"} on details of your situation — check whether they apply to you.`,
-      );
-    }
-    parts.push("Every step below links to the official information it is based on.");
+    parts.push(tpl.identified(ctx.tasks.length, required));
+    if (conditional > 0) parts.push(tpl.conditional(conditional));
+    parts.push(tpl.linked);
 
     const def = getEventType(ctx.eventType);
     const warnings: string[] = [];
-    if (def?.highConsequence) {
-      warnings.push(
-        "This topic can have legal or financial consequences. Dumonda provides verified official information and navigation, not an official decision — for binding answers contact the responsible authority.",
-      );
-    }
+    if (def?.highConsequence) warnings.push(tpl.highConsequence);
 
     return {
       summary: parts.join(" "),
-      intro: def ? `Here is what applies for: ${def.title.toLowerCase()}.` : "",
+      intro: def ? `${tpl.intro} ${def.title.toLowerCase()}.` : "",
       warnings,
       followUpSuggestions: [],
     };
@@ -109,6 +99,67 @@ export class DeterministicProvider implements AIProvider {
     };
   }
 }
+
+// ─── Localised answer templates ──────────────────────────────────────────────
+
+interface SummaryTemplate {
+  identified: (total: number, required: number) => string;
+  conditional: (count: number) => string;
+  linked: string;
+  highConsequence: string;
+  intro: string;
+}
+
+const SUMMARY_TEMPLATES: Record<string, SummaryTemplate> = {
+  en: {
+    identified: (total, required) =>
+      `Based on your situation, we identified ${total} ${total === 1 ? "step" : "steps"}` +
+      (required > 0 ? `, ${required} of ${required === 1 ? "which is an official obligation" : "which are official obligations"}` : "") +
+      ".",
+    conditional: (count) =>
+      `${count} ${count === 1 ? "item depends" : "items depend"} on details of your situation — check whether they apply to you.`,
+    linked: "Every step below links to the official information it is based on.",
+    highConsequence:
+      "This topic can have legal or financial consequences. Dumonda provides verified official information and navigation, not an official decision — for binding answers contact the responsible authority.",
+    intro: "Here is what applies for:",
+  },
+  de: {
+    identified: (total, required) =>
+      `Für deine Situation haben wir ${total} ${total === 1 ? "Schritt" : "Schritte"} identifiziert` +
+      (required > 0 ? `, davon ${required} offizielle ${required === 1 ? "Pflicht" : "Pflichten"}` : "") +
+      ".",
+    conditional: (count) =>
+      `${count} ${count === 1 ? "Punkt hängt" : "Punkte hängen"} von Details deiner Situation ab — prüfe, ob sie auf dich zutreffen.`,
+    linked: "Jeder Schritt unten verweist auf die offizielle Information, auf der er beruht.",
+    highConsequence:
+      "Dieses Thema kann rechtliche oder finanzielle Folgen haben. Dumonda liefert verifizierte offizielle Informationen und Orientierung, keinen amtlichen Entscheid — verbindliche Auskünfte gibt die zuständige Behörde.",
+    intro: "Das gilt für:",
+  },
+  fr: {
+    identified: (total, required) =>
+      `Pour votre situation, nous avons identifié ${total} ${total === 1 ? "démarche" : "démarches"}` +
+      (required > 0 ? `, dont ${required} ${required === 1 ? "obligation officielle" : "obligations officielles"}` : "") +
+      ".",
+    conditional: (count) =>
+      `${count} ${count === 1 ? "élément dépend" : "éléments dépendent"} des détails de votre situation — vérifiez s'ils vous concernent.`,
+    linked: "Chaque démarche ci-dessous renvoie à l'information officielle sur laquelle elle repose.",
+    highConsequence:
+      "Ce sujet peut avoir des conséquences juridiques ou financières. Dumonda fournit des informations officielles vérifiées et de l'orientation, pas de décision officielle — pour une réponse contraignante, contactez l'autorité compétente.",
+    intro: "Voici ce qui s'applique pour :",
+  },
+  it: {
+    identified: (total, required) =>
+      `Per la tua situazione abbiamo identificato ${total} ${total === 1 ? "passo" : "passi"}` +
+      (required > 0 ? `, di cui ${required} ${required === 1 ? "obbligo ufficiale" : "obblighi ufficiali"}` : "") +
+      ".",
+    conditional: (count) =>
+      `${count} ${count === 1 ? "elemento dipende" : "elementi dipendono"} dai dettagli della tua situazione — verifica se ti riguardano.`,
+    linked: "Ogni passo qui sotto rimanda all'informazione ufficiale su cui si basa.",
+    highConsequence:
+      "Questo tema può avere conseguenze legali o finanziarie. Dumonda offre informazioni ufficiali verificate e orientamento, non decisioni ufficiali — per risposte vincolanti contatta l'autorità competente.",
+    intro: "Ecco cosa si applica per:",
+  },
+};
 
 // ─── Deterministic entity extraction ─────────────────────────────────────────
 

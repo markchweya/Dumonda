@@ -95,10 +95,3 @@ export function Badge({
     />
   );
 }
-
-export const PRIORITY_LABEL: Record<string, string> = {
-  required: "Required",
-  may_apply: "May apply",
-  recommended: "Recommended",
-  information: "Good to know",
-};

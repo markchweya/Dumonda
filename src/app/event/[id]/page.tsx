@@ -9,19 +9,22 @@ import { cantonLabel } from "@/lib/swiss/cantons";
 import { TaskCard, type TaskView } from "@/components/event/task-card";
 import type { SourceInfo } from "@/components/event/source-drawer";
 import { Card } from "@/components/ui";
+import { t, type MessageKey } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-const SECTIONS: { key: TaskView["priority"]; title: string; hint: string }[] = [
-  { key: "required", title: "Do first", hint: "Official obligations" },
-  { key: "may_apply", title: "Depending on your situation", hint: "Check whether these apply to you" },
-  { key: "recommended", title: "Also worth doing", hint: "Useful, not an official obligation" },
-  { key: "information", title: "Good to know", hint: "Background that affects you" },
+const SECTIONS: { key: TaskView["priority"]; titleKey: MessageKey; hintKey: MessageKey }[] = [
+  { key: "required", titleKey: "event.doFirst", hintKey: "event.doFirstHint" },
+  { key: "may_apply", titleKey: "event.maybe", hintKey: "event.maybeHint" },
+  { key: "recommended", titleKey: "event.recommended", hintKey: "event.recommendedHint" },
+  { key: "information", titleKey: "event.info", hintKey: "event.infoHint" },
 ];
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getOrCreateSession();
+  const locale = await getLocale();
   const db = await getDb();
 
   const [event] = await db
@@ -122,9 +125,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         <div className="mt-6">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium">
-              {completed} of {tasks.length} handled
+              {completed} {t(locale, "event.of")} {tasks.length} {t(locale, "event.handled")}
             </span>
-            <span className="text-ink-soft">{tasks.length - completed} remaining</span>
+            <span className="text-ink-soft">
+              {tasks.length - completed} {t(locale, "event.remaining")}
+            </span>
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-200">
             <div
@@ -138,16 +143,14 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       {["fine_received", "tax_return"].includes(event.eventType) && (
         <Card className="mt-5 flex flex-wrap items-center justify-between gap-3 p-4">
           <p className="text-sm">
-            <span className="font-medium">Have the letter? </span>
-            <span className="text-ink-soft">
-              Upload it and Dumonda identifies the authority, dates and amounts it contains.
-            </span>
+            <span className="font-medium">{t(locale, "event.haveLetter")} </span>
+            <span className="text-ink-soft">{t(locale, "event.haveLetterSub")}</span>
           </p>
           <Link
             href="/upload"
             className="rounded-xl border border-line px-3.5 py-2 text-sm font-medium hover:border-ink/30 transition-colors"
           >
-            Upload the letter
+            {t(locale, "event.uploadLetter")}
           </Link>
         </Card>
       )}
@@ -184,12 +187,12 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           return (
             <section key={section.key} className="mt-9">
               <div className="flex items-baseline justify-between">
-                <h2 className="text-base font-semibold">{section.title}</h2>
-                <span className="text-xs text-ink-soft">{section.hint}</span>
+                <h2 className="text-base font-semibold">{t(locale, section.titleKey)}</h2>
+                <span className="text-xs text-ink-soft">{t(locale, section.hintKey)}</span>
               </div>
               <div className="mt-3 space-y-3">
-                {sectionTasks.map((t) => (
-                  <TaskCard key={t.id} task={t} signedIn={!!session.userId} />
+                {sectionTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} signedIn={!!session.userId} locale={locale} />
                 ))}
               </div>
             </section>
@@ -198,27 +201,22 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       )}
 
       <Card className="mt-10 p-5">
-        <p className="text-sm font-medium">Something else on your mind?</p>
-        <p className="mt-1 text-sm text-ink-soft">
-          Ask a follow-up question or describe another situation.
-        </p>
+        <p className="text-sm font-medium">{t(locale, "event.somethingElse")}</p>
+        <p className="mt-1 text-sm text-ink-soft">{t(locale, "event.somethingElseSub")}</p>
         <Link
           href="/ask"
           className="mt-3 inline-block rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-paper hover:bg-black transition-colors"
         >
-          Ask Dumonda
+          {t(locale, "event.askDumonda")}
         </Link>
       </Card>
 
       {!session.userId && (
         <Card className="mt-4 border-dashed p-5 text-sm">
-          <span className="font-medium">Keep this checklist. </span>
-          <span className="text-ink-soft">
-            Create a free account and this checklist, its progress and deadlines
-            will be saved to your dashboard.
-          </span>
+          <span className="font-medium">{t(locale, "event.keepTitle")} </span>
+          <span className="text-ink-soft">{t(locale, "event.keepText")}</span>
           <Link href="/signup" className="ml-2 font-medium underline underline-offset-4">
-            Create account
+            {t(locale, "event.createAccount")}
           </Link>
         </Card>
       )}

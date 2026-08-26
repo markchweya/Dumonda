@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button, Card, Input } from "@/components/ui";
+import { t, type Locale } from "@/lib/i18n";
 
-export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+export function AuthForm({ mode, locale = "en" }: { mode: "signin" | "signup"; locale?: Locale }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,16 +42,14 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   return (
     <Card className="mx-auto w-full max-w-sm p-6 sm:p-8">
       <h1 className="text-xl font-semibold tracking-tight">
-        {mode === "signin" ? "Welcome back" : "Create your account"}
+        {mode === "signin" ? t(locale, "auth.welcomeBack") : t(locale, "auth.createTitle")}
       </h1>
       <p className="mt-1 text-sm text-ink-soft">
-        {mode === "signin"
-          ? "Sign in to your checklists and deadlines."
-          : "Your current checklist will be saved to your account."}
+        {mode === "signin" ? t(locale, "auth.signInSub") : t(locale, "auth.createSub")}
       </p>
       <form onSubmit={submit} className="mt-6 space-y-4">
         <div>
-          <label className="text-sm font-medium" htmlFor="email">Email</label>
+          <label className="text-sm font-medium" htmlFor="email">{t(locale, "auth.email")}</label>
           <div className="mt-1.5">
             <Input
               id="email"
@@ -63,7 +62,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           </div>
         </div>
         <div>
-          <label className="text-sm font-medium" htmlFor="password">Password</label>
+          <label className="text-sm font-medium" htmlFor="password">{t(locale, "auth.password")}</label>
           <div className="mt-1.5">
             <Input
               id="password"
@@ -76,13 +75,13 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             />
           </div>
           {mode === "signup" && (
-            <p className="mt-1 text-xs text-ink-soft">At least 8 characters.</p>
+            <p className="mt-1 text-xs text-ink-soft">{t(locale, "auth.minChars")}</p>
           )}
         </div>
         {error && <p className="text-sm text-accent">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {mode === "signin" ? "Sign in" : "Create account"}
+          {mode === "signin" ? t(locale, "auth.signIn") : t(locale, "auth.create")}
         </Button>
       </form>
       <p className="mt-5 text-center text-sm text-ink-soft">

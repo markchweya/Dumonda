@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { Bell, Building2, CalendarClock, Check, FileText, MessageCircleQuestion, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Badge, Card, PRIORITY_LABEL, cn } from "@/components/ui";
+import { Badge, Card, cn } from "@/components/ui";
 import { SourceDrawer, verificationLabel, type SourceInfo } from "./source-drawer";
+import { t, type Locale } from "@/lib/i18n";
 
 export interface TaskView {
   id: string;
@@ -22,7 +23,15 @@ export interface TaskView {
   sources: SourceInfo[];
 }
 
-export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?: boolean }) {
+export function TaskCard({
+  task,
+  signedIn = false,
+  locale = "en",
+}: {
+  task: TaskView;
+  signedIn?: boolean;
+  locale?: Locale;
+}) {
   const router = useRouter();
   const [status, setStatus] = useState(task.status);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -92,7 +101,7 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className={cn("font-medium leading-snug", done && "line-through decoration-1")}>{task.title}</p>
-            <Badge tone={task.priority}>{PRIORITY_LABEL[task.priority]}</Badge>
+            <Badge tone={task.priority}>{t(locale, `task.${task.priority}`)}</Badge>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{task.description}</p>
 
@@ -130,7 +139,13 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
                 )}
               >
                 {allVerified ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
-                {allVerified ? "Verified source" : verificationLabel(task.sources[0].verification).label}
+                {allVerified
+                  ? t(locale, "source.verified")
+                  : task.sources[0].verification === "seed_demo"
+                    ? t(locale, "source.seed")
+                    : task.sources[0].verification === "pending_review"
+                      ? t(locale, "source.pending")
+                      : verificationLabel(task.sources[0].verification).label}
               </button>
             )}
             {task.officialUrl && (
@@ -140,7 +155,7 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
                 rel="noopener noreferrer"
                 className="text-ink underline underline-offset-4 hover:text-ink-soft"
               >
-                Open official service
+                {t(locale, "task.openOfficial")}
               </a>
             )}
             <Link
@@ -148,12 +163,12 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
               className="inline-flex items-center gap-1.5 text-ink-soft hover:text-ink transition-colors"
             >
               <MessageCircleQuestion className="h-4 w-4" />
-              Ask Dumonda
+              {t(locale, "event.askDumonda")}
             </Link>
             {task.deadlineIso && !done && !notApplicable && (
               reminder === "needs_account" ? (
                 <Link href="/signup" className="text-ink-soft underline underline-offset-4 hover:text-ink">
-                  Create an account to get reminders
+                  {t(locale, "task.reminderNeedsAccount")}
                 </Link>
               ) : (
                 <button
@@ -166,7 +181,11 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
                   )}
                 >
                   <Bell className="h-4 w-4" />
-                  {reminder === "set" ? "Reminder set" : reminder === "saving" ? "Setting…" : "Remind me"}
+                  {reminder === "set"
+                    ? t(locale, "task.reminderSet")
+                    : reminder === "saving"
+                      ? t(locale, "task.reminderSaving")
+                      : t(locale, "task.remindMe")}
                 </button>
               )
             )}
@@ -176,7 +195,7 @@ export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?
                 onClick={() => setTaskStatus(notApplicable ? "todo" : "not_applicable")}
                 className="text-ink-soft/70 hover:text-ink transition-colors cursor-pointer"
               >
-                {notApplicable ? "Applies after all" : "Doesn't apply to me"}
+                {notApplicable ? t(locale, "task.appliesAfterAll") : t(locale, "task.notApplicable")}
               </button>
             )}
           </div>
