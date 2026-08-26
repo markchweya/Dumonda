@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import type { Db } from "./index";
 import * as schema from "./schema";
 import { SEED_AUTHORITIES, SEED_JURISDICTIONS, SEED_RULES, SEED_SOURCES } from "./seed-data";
+import { CANTONAL_AUTHORITIES, CANTONAL_RULES, CANTONAL_SOURCES } from "./seed-cantons";
 import { chunkText, checksumOf } from "@/lib/sources/ingest";
 import { getEmbedder } from "@/lib/retrieval/embeddings";
 import { hashPassword } from "@/lib/auth";
@@ -22,6 +23,9 @@ export async function seedIfEmpty(db: Db) {
 
 export async function runSeed(db: Db) {
   const now = new Date();
+  const allAuthorities = [...SEED_AUTHORITIES, ...CANTONAL_AUTHORITIES];
+  const allSources = [...SEED_SOURCES, ...CANTONAL_SOURCES];
+  const allRules = [...SEED_RULES, ...CANTONAL_RULES];
 
   for (const j of SEED_JURISDICTIONS) {
     await db
@@ -30,7 +34,7 @@ export async function runSeed(db: Db) {
       .onConflictDoNothing();
   }
 
-  for (const a of SEED_AUTHORITIES) {
+  for (const a of allAuthorities) {
     await db
       .insert(schema.authorities)
       .values({
@@ -46,7 +50,7 @@ export async function runSeed(db: Db) {
   }
 
   const embedder = getEmbedder();
-  for (const s of SEED_SOURCES) {
+  for (const s of allSources) {
     await db
       .insert(schema.sources)
       .values({
@@ -93,7 +97,7 @@ export async function runSeed(db: Db) {
     }
   }
 
-  for (const r of SEED_RULES) {
+  for (const r of allRules) {
     await db
       .insert(schema.rules)
       .values({
