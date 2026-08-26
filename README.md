@@ -41,6 +41,12 @@ npm run db:seed     # seed reference data explicitly
 
 To reset the local database, delete the `./.data/` directory.
 
+Note on the embedded database: PGlite is a single-process engine. If you run
+CLI database commands (`db:seed`, `ingest:all`, `cron:refetch`, `db:reindex`)
+while `npm run dev` is running, restart the dev server afterwards so it picks
+up the changes — or stop it first. Production Postgres has no such
+restriction.
+
 ## Configuration
 
 Copy `.env.example` to `.env` and adjust. Everything has a working default.

@@ -2,6 +2,8 @@ import { asc } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { Badge, Card } from "@/components/ui";
 import { RuleToggle } from "@/components/admin/rule-toggle";
+import { RuleEditor } from "@/components/admin/rule-editor";
+import { EVENT_TYPES } from "@/lib/events/taxonomy";
 import type { TaskTemplate } from "@/lib/rules/types";
 
 export default async function AdminRulesPage() {
@@ -10,17 +12,22 @@ export default async function AdminRulesPage() {
     .select()
     .from(schema.rules)
     .orderBy(asc(schema.rules.eventType), asc(schema.rules.id));
+  const eventTypes = EVENT_TYPES.map((e) => ({ id: e.id, title: e.title }));
 
   return (
     <div className="space-y-3">
       <Card className="p-5">
-        <p className="text-sm leading-relaxed text-ink-soft">
-          Rules are the deterministic layer that decides which obligations apply
-          — the AI model never invents them. Each rule targets one event type
-          and one jurisdiction, has a condition tree over known facts, and emits
-          task templates backed by sources. Deactivating a rule takes effect
-          immediately for new checklists.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <p className="max-w-2xl text-sm leading-relaxed text-ink-soft">
+            Rules are the deterministic layer that decides which obligations
+            apply — the AI model never invents them. Each rule targets one
+            event type and one jurisdiction, has a condition tree over known
+            facts, and emits task templates backed by sources. Edits bump the
+            rule version; deactivating takes effect immediately for new
+            checklists.
+          </p>
+          <RuleEditor eventTypes={eventTypes} />
+        </div>
       </Card>
       {rules.map((r) => {
         const actions = r.actions as TaskTemplate[];
@@ -34,7 +41,20 @@ export default async function AdminRulesPage() {
                 <Badge tone="neutral">v{r.version}</Badge>
                 {!r.active && <Badge tone="danger">inactive</Badge>}
               </div>
-              <RuleToggle ruleId={r.id} active={r.active} />
+              <div className="flex items-center gap-2">
+                <RuleEditor
+                  eventTypes={eventTypes}
+                  initial={{
+                    ruleId: r.id,
+                    eventType: r.eventType,
+                    jurisdiction: r.jurisdiction,
+                    conditionsJson: JSON.stringify(r.conditions, null, 2),
+                    actionsJson: JSON.stringify(r.actions, null, 2),
+                    notes: r.notes ?? "",
+                  }}
+                />
+                <RuleToggle ruleId={r.id} active={r.active} />
+              </div>
             </div>
             <p className="mt-2 text-xs text-ink-soft">
               Conditions: <code className="rounded bg-stone-100 px-1.5 py-0.5">{JSON.stringify(r.conditions)}</code>

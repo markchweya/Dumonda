@@ -111,3 +111,118 @@ export async function toggleRuleAction(ruleId: string, active: boolean): Promise
   await db.update(schema.rules).set({ active }).where(eq(schema.rules.id, ruleId));
   revalidatePath("/admin/rules");
 }
+
+// ─── Rule authoring ──────────────────────────────────────────────────────────
+
+export interface RuleActionResult {
+  ok: boolean;
+  error?: string;
+}
+
+async function validateRulePayload(payload: {
+  eventType: string;
+  jurisdiction: string;
+  conditionsJson: string;
+  actionsJson: string;
+  notes?: string;
+}): Promise<{ ok: true; input: import("@/lib/rules/schemas").RuleInput } | { ok: false; error: string }> {
+  const { ruleInputSchema, unknownSourceIds } = await import("@/lib/rules/schemas");
+  let conditions: unknown;
+  let actions: unknown;
+  try {
+    conditions = JSON.parse(payload.conditionsJson);
+  } catch {
+    return { ok: false, error: "Conditions are not valid JSON." };
+  }
+  try {
+    actions = JSON.parse(payload.actionsJson);
+  } catch {
+    return { ok: false, error: "Actions are not valid JSON." };
+  }
+  const parsed = ruleInputSchema.safeParse({
+    eventType: payload.eventType,
+    jurisdiction: payload.jurisdiction.trim(),
+    conditions,
+    actions,
+    notes: payload.notes?.trim() || null,
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return { ok: false, error: `${issue.path.join(".") || "rule"}: ${issue.message}` };
+  }
+  const db = await getDb();
+  const sources = await db.select({ id: schema.sources.id }).from(schema.sources);
+  const unknown = unknownSourceIds(parsed.data, new Set(sources.map((s) => s.id)));
+  if (unknown.length > 0) {
+    return { ok: false, error: `Unknown source ids: ${unknown.join(", ")}. Add the source first.` };
+  }
+  return { ok: true, input: parsed.data };
+}
+
+export async function createRuleAction(payload: {
+  eventType: string;
+  jurisdiction: string;
+  conditionsJson: string;
+  actionsJson: string;
+  notes?: string;
+}): Promise<RuleActionResult> {
+  await requireAdmin();
+  const validated = await validateRulePayload(payload);
+  if (!validated.ok) return { ok: false, error: validated.error };
+  const db = await getDb();
+  const allSourceIds = [
+    ...new Set(validated.input.actions.flatMap((a) => a.sourceIds)),
+  ];
+  await db.insert(schema.rules).values({
+    id: newId("rule"),
+    eventType: validated.input.eventType,
+    jurisdiction: validated.input.jurisdiction,
+    conditions: validated.input.conditions,
+    actions: validated.input.actions,
+    sourceIds: allSourceIds,
+    version: 1,
+    active: true,
+    notes: validated.input.notes ?? null,
+  });
+  revalidatePath("/admin/rules");
+  return { ok: true };
+}
+
+export async function updateRuleAction(
+  ruleId: string,
+  payload: {
+    eventType: string;
+    jurisdiction: string;
+    conditionsJson: string;
+    actionsJson: string;
+    notes?: string;
+  },
+): Promise<RuleActionResult> {
+  await requireAdmin();
+  const validated = await validateRulePayload(payload);
+  if (!validated.ok) return { ok: false, error: validated.error };
+  const db = await getDb();
+  const [existing] = await db
+    .select({ version: schema.rules.version })
+    .from(schema.rules)
+    .where(eq(schema.rules.id, ruleId))
+    .limit(1);
+  if (!existing) return { ok: false, error: "Rule not found." };
+  const allSourceIds = [
+    ...new Set(validated.input.actions.flatMap((a) => a.sourceIds)),
+  ];
+  await db
+    .update(schema.rules)
+    .set({
+      eventType: validated.input.eventType,
+      jurisdiction: validated.input.jurisdiction,
+      conditions: validated.input.conditions,
+      actions: validated.input.actions,
+      sourceIds: allSourceIds,
+      version: existing.version + 1,
+      notes: validated.input.notes ?? null,
+    })
+    .where(eq(schema.rules.id, ruleId));
+  revalidatePath("/admin/rules");
+  return { ok: true };
+}
