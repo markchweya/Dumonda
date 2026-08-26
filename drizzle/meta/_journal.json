@@ -8,6 +8,13 @@
       "when": 1787735620820,
       "tag": "0000_damp_thing",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787737560476,
+      "tag": "0001_gifted_stephen_strange",
+      "breakpoints": true
     }
   ]
 }

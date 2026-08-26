@@ -137,6 +137,8 @@ export const sources = pgTable(
     })
       .notNull()
       .default("pending_review"),
+    /** how often the scheduled refetch re-checks this source for changes */
+    refreshIntervalDays: integer("refresh_interval_days").notNull().default(30),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [

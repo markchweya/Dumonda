@@ -1,0 +1,1 @@
+ALTER TABLE "sources" ADD COLUMN "refresh_interval_days" integer DEFAULT 30 NOT NULL;
