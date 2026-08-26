@@ -16,7 +16,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate-cli.ts",
     "db:seed": "tsx src/lib/db/seed-cli.ts",
-    "db:sync-urls": "tsx scripts/sync-source-urls.ts"
+    "db:sync-urls": "tsx scripts/sync-source-urls.ts",
+    "db:reindex": "tsx scripts/reindex-embeddings.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.4",

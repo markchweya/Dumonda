@@ -51,7 +51,10 @@ export async function retrievePassages(
   const sourceIds = usable.map((s) => s.id);
   const sourceById = new Map(usable.map((s) => [s.id, s]));
 
-  // 2. Vector similarity over the filtered chunk set.
+  // 2. Vector similarity over the filtered chunk set. Only vectors produced
+  // by the ACTIVE embedder are comparable — after switching providers, chunks
+  // not yet re-indexed (npm run db:reindex) fall back to keyword scoring
+  // instead of polluting results with cross-space similarities.
   const embedder = getEmbedder();
   let vectorRows: { id: string; sourceId: string; content: string; similarity: number }[] = [];
   try {
@@ -65,31 +68,35 @@ export async function retrievePassages(
         similarity,
       })
       .from(schema.sourceChunks)
-      .where(inArray(schema.sourceChunks.sourceId, sourceIds))
+      .where(
+        and(
+          inArray(schema.sourceChunks.sourceId, sourceIds),
+          sql`${schema.sourceChunks.metadata}->>'embedder' = ${embedder.name}`,
+        ),
+      )
       .orderBy(desc(similarity))
       .limit(limit * 3);
   } catch {
     vectorRows = [];
   }
 
-  // 3. Keyword scoring over the same chunks (independent signal).
+  // 3. Keyword scoring over ALL candidate chunks (independent signal), with
+  // vector similarity merged in where the active embedder produced a vector.
   const terms = query
     .toLowerCase()
     .split(/[^a-zäöüéèàêç0-9]+/)
     .filter((w) => w.length > 3);
-  const allChunks =
-    vectorRows.length > 0
-      ? vectorRows
-      : (
-          await db
-            .select({
-              id: schema.sourceChunks.id,
-              sourceId: schema.sourceChunks.sourceId,
-              content: schema.sourceChunks.content,
-            })
-            .from(schema.sourceChunks)
-            .where(inArray(schema.sourceChunks.sourceId, sourceIds))
-        ).map((c) => ({ ...c, similarity: 0 }));
+  const similarityById = new Map(vectorRows.map((r) => [r.id, r.similarity]));
+  const allChunks = (
+    await db
+      .select({
+        id: schema.sourceChunks.id,
+        sourceId: schema.sourceChunks.sourceId,
+        content: schema.sourceChunks.content,
+      })
+      .from(schema.sourceChunks)
+      .where(inArray(schema.sourceChunks.sourceId, sourceIds))
+  ).map((c) => ({ ...c, similarity: similarityById.get(c.id) ?? 0 }));
 
   const scored = allChunks.map((chunk) => {
     const lower = chunk.content.toLowerCase();
