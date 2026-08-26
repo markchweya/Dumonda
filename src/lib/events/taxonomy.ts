@@ -317,7 +317,7 @@ export const EVENT_TYPES: EventTypeDef[] = [
     title: "Leaving Switzerland",
     description: "You are moving abroad and deregistering from Switzerland.",
     relevantFacts: ["canton", "municipality", "event_date", "nationality_category", "moving_abroad_country_known", "has_vehicle"],
-    keywords: ["leaving switzerland", "moving abroad", "emigrate", "deregister switzerland", "move out of switzerland"],
+    keywords: ["leaving switzerland", "moving abroad", "emigrat", "deregister switzerland", "move out of switzerland", "auswandern"],
     highConsequence: true,
   },
 
@@ -328,7 +328,7 @@ export const EVENT_TYPES: EventTypeDef[] = [
     title: "New baby",
     description: "You recently had (or are expecting) a child.",
     relevantFacts: ["canton", "municipality", "child_born_in_ch", "employment_status", "nationality_category", "event_date", "marital_status"],
-    keywords: ["had a baby", "gave birth", "newborn", "new baby", "child was born", "expecting", "just had a child"],
+    keywords: ["had a baby", "gave birth", "newborn", "new baby", "was born", "expecting", "just had a child", "avuto un bambino", "bébé", "baby bekommen"],
   },
   {
     id: "marriage",
@@ -355,7 +355,7 @@ export const EVENT_TYPES: EventTypeDef[] = [
     title: "Losing your job",
     description: "Your employment ended or was terminated.",
     relevantFacts: ["canton", "municipality", "event_date", "nationality_category", "residence_permit"],
-    keywords: ["lost my job", "fired", "laid off", "terminated", "unemployment", "job loss", "redundant", "dismissed"],
+    keywords: ["lost my job", "fired", "laid off", "terminated", "unemployment", "job loss", "redundant", "dismissed", "perdu mon travail", "job verloren", "perso il lavoro"],
     highConsequence: true,
   },
   {
@@ -446,7 +446,7 @@ export const EVENT_TYPES: EventTypeDef[] = [
     title: "Starting a business",
     description: "You want to become self-employed or found a company.",
     relevantFacts: ["canton", "business_legal_form", "nationality_category", "employment_status"],
-    keywords: ["start a company", "start a business", "become self-employed", "found a gmbh", "freelance", "self employment", "startup"],
+    keywords: ["start a company", "start a business", "become self-employed", "gmbh", "freelance", "self employment", "self-employed", "startup", "founding a company", "firma gründen"],
   },
 
   // LEGAL_ADMIN --------------------------------------------------------------
@@ -467,7 +467,7 @@ export const EVENT_TYPES: EventTypeDef[] = [
     title: "Changing health insurance",
     description: "You want to change your mandatory health insurance or model.",
     relevantFacts: ["canton", "event_date"],
-    keywords: ["change health insurance", "krankenkasse wechseln", "switch health insurance", "premium increase"],
+    keywords: ["change health insurance", "krankenkasse", "switch health insurance", "premium increase", "premium went up", "assurance maladie", "cassa malati"],
   },
 
   // DOCUMENTS ----------------------------------------------------------------

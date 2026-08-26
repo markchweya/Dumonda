@@ -33,7 +33,7 @@ export class DeterministicProvider implements AIProvider {
 
     // Disambiguate moves: "moving to <canton>" with two cantons → intercantonal
     const cantons = findCantonsInText(query);
-    if (/\bmov(e|ed|ing)\b|\bumzug\b|\bd[ée]m[ée]nag/i.test(query)) {
+    if (/\bmov(e|ed|ing)\b|\bumzug\b|\bumgezogen\b|\bz[üu]gel(n|e)?\b|\bd[ée]m[ée]nag|\btrasferit/i.test(query)) {
       if (/abroad|leave switzerland|out of switzerland|emigrat/i.test(lower)) {
         best = { id: "leave_switzerland", score: 100 };
       } else if (/to switzerland|nach der schweiz|in die schweiz/i.test(lower)) {

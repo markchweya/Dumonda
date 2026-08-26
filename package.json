@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "eval:classification": "tsx scripts/eval-classification.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate-cli.ts",
     "db:seed": "tsx src/lib/db/seed-cli.ts"
