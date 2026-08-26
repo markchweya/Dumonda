@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkRobots, checksumOf, chunkText, extractTextFromHtml } from "@/lib/sources/ingest";
+import { checkRobots, checksumOf, chunkText, extractTextFromHtml, looksLikeErrorPage } from "@/lib/sources/ingest";
 
 describe("checkRobots", () => {
   it("allows paths not disallowed for *", () => {
@@ -38,6 +38,22 @@ describe("chunkText", () => {
     const chunks = chunkText(text, 500, 50);
     expect(chunks.length).toBeGreaterThan(3);
     for (const c of chunks) expect(c.length).toBeLessThanOrEqual(600);
+  });
+});
+
+describe("looksLikeErrorPage", () => {
+  it("detects soft 404s served with HTTP 200 (SPA error shells)", () => {
+    expect(looksLikeErrorPage("Suche starten Zum Inhalt springen Error Page (404) Alle Themen")).toBe(true);
+    expect(looksLikeErrorPage("Oops — page not found. Try the homepage.")).toBe(true);
+    expect(looksLikeErrorPage("Seite nicht gefunden — zurück zur Startseite")).toBe(true);
+  });
+
+  it("does not flag real content", () => {
+    expect(
+      looksLikeErrorPage(
+        "When you move to a new commune in Switzerland you must register within 14 days of moving in.",
+      ),
+    ).toBe(false);
   });
 });
 

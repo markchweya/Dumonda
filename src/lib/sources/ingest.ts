@@ -90,6 +90,20 @@ export function checksumOf(text: string): string {
   return createHash("sha256").update(text).digest("hex");
 }
 
+/**
+ * Detects "soft 404s": pages that answer HTTP 200 but whose body is an error
+ * page (typical for client-rendered SPAs). Storing those as source content
+ * would silently poison the knowledge base.
+ */
+export function looksLikeErrorPage(text: string): boolean {
+  const head = text.slice(0, 400).toLowerCase();
+  return (
+    /error page \(404\)|page not found|seite nicht gefunden|page introuvable|pagina non trovata|404 not found/.test(
+      head,
+    )
+  );
+}
+
 export interface IngestResult {
   ok: boolean;
   message: string;
@@ -138,8 +152,19 @@ export async function ingestSource(
   }
 
   const text = extractTextFromHtml(html);
-  if (text.length < 100) {
-    return { ok: false, message: "Extracted text too short — page may be JavaScript-rendered" };
+  if (looksLikeErrorPage(text)) {
+    return {
+      ok: false,
+      message:
+        "The server returned an error page (soft 404) — the URL is wrong or the site only renders content with JavaScript. Stored knowledge unchanged.",
+    };
+  }
+  if (text.length < 400) {
+    return {
+      ok: false,
+      message:
+        "Extracted text too short to be real content — the page is likely JavaScript-rendered. Stored knowledge unchanged.",
+    };
   }
   const checksum = checksumOf(text);
   const now = new Date();
