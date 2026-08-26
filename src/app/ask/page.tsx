@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AskFlow } from "@/components/ask-flow";
 
 export const metadata = { title: "What's happening?" };
@@ -20,6 +21,13 @@ export default async function AskPage({
       <div className="mt-8">
         <AskFlow initialQuery={q ?? ""} autoStart={!!q} />
       </div>
+      <p className="mt-6 text-sm text-ink-soft">
+        Got an official letter instead?{" "}
+        <Link href="/upload" className="font-medium text-ink underline underline-offset-4">
+          Upload it
+        </Link>{" "}
+        and we&apos;ll work out what it is.
+      </p>
     </div>
   );
 }

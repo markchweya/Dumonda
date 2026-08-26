@@ -135,6 +135,23 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
 
+      {["fine_received", "tax_return"].includes(event.eventType) && (
+        <Card className="mt-5 flex flex-wrap items-center justify-between gap-3 p-4">
+          <p className="text-sm">
+            <span className="font-medium">Have the letter? </span>
+            <span className="text-ink-soft">
+              Upload it and Dumonda identifies the authority, dates and amounts it contains.
+            </span>
+          </p>
+          <Link
+            href="/upload"
+            className="rounded-xl border border-line px-3.5 py-2 text-sm font-medium hover:border-ink/30 transition-colors"
+          >
+            Upload the letter
+          </Link>
+        </Card>
+      )}
+
       {warnings.map((w) => (
         <Card key={w} className="mt-5 flex items-start gap-3 border-amber-ink/20 bg-amber-soft p-4">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-ink" />

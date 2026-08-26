@@ -355,6 +355,27 @@ export const reminders = pgTable(
   (t) => [index("reminders_user_idx").on(t.userId, t.status)],
 );
 
+// ─── Uploaded documents ("what does this letter mean?") ─────────────────────
+
+export const documents = pgTable(
+  "documents",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id").references(() => sessions.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    filename: text("filename").notNull(),
+    mimeType: text("mime_type").notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    /** extracted text — stored so the user can revisit the analysis; deletable */
+    extractedText: text("extracted_text"),
+    /** structured analysis: authority match, dates, amounts, suggested event */
+    analysis: jsonb("analysis").$type<Record<string, unknown>>().notNull().default({}),
+    eventId: text("event_id").references(() => lifeEvents.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("documents_user_idx").on(t.userId), index("documents_session_idx").on(t.sessionId)],
+);
+
 // ─── Privacy-respecting analytics ────────────────────────────────────────────
 
 export const analyticsEvents = pgTable(

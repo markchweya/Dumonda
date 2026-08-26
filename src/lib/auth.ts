@@ -1,6 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { newId } from "@/lib/ids";
 
@@ -105,6 +105,11 @@ export async function destroySession() {
   const id = store.get(SESSION_COOKIE)?.value;
   if (id) {
     const db = await getDb();
+    // Guest uploads would be orphaned by the session's FK set-null — remove
+    // their extracted text with the session (privacy by design).
+    await db
+      .delete(schema.documents)
+      .where(and(eq(schema.documents.sessionId, id), isNull(schema.documents.userId)));
     await db.delete(schema.sessions).where(eq(schema.sessions.id, id));
   }
   store.delete(SESSION_COOKIE);
