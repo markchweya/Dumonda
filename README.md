@@ -30,13 +30,19 @@ Admin console: sign in at `/signin` with the seeded admin account
 Other commands:
 
 ```bash
-npm run typecheck   # tsc --noEmit
-npm run lint        # eslint
-npm test            # vitest (unit + integration against embedded Postgres)
-npm run build       # production build
-npm run db:generate # regenerate SQL migrations after schema changes
-npm run db:migrate  # apply migrations explicitly
-npm run db:seed     # seed reference data explicitly
+npm run typecheck            # tsc --noEmit
+npm run lint                 # eslint
+npm test                     # vitest (unit + integration against embedded Postgres)
+npm run build                # production build
+npm run db:generate          # regenerate SQL migrations after schema changes
+npm run db:migrate           # apply migrations explicitly
+npm run db:seed              # seed reference data explicitly
+npm run db:sync-urls         # sync corrected source URLs into an existing db
+npm run db:reindex           # re-embed all chunks with the configured embedder
+npm run ingest:all           # fetch + index every registered source (rate-limited)
+npm run cron:refetch         # change monitoring: re-fetch sources due for a check
+npm run cron:reminders       # dispatch due email reminders
+npm run eval:classification  # compare the configured AI provider vs the baseline
 ```
 
 To reset the local database, delete the `./.data/` directory.
@@ -137,10 +143,48 @@ No provider-specific logic exists outside `src/lib/ai/`.
 `/admin/sources` manages a controlled registry — Dumonda never crawls. For a
 registered URL, **Fetch & index** checks `robots.txt`, fetches with a named
 user agent and timeout, sanitises the HTML, chunks and embeds the text and
-stores a checksum. If a later fetch produces a different checksum, the change
-lands in `/admin/review` with an AI-drafted assessment — the stored knowledge
-is **not** replaced until a human accepts the change, and verification resets
-to pending until re-approved.
+stores a checksum. The first live fetch of a seeded source applies directly
+(the seed text was never a live snapshot); afterwards, a fetch that produces a
+different checksum lands in `/admin/review` with an AI-drafted assessment —
+stored knowledge is **not** replaced until a human accepts the change, and
+verification resets to pending until re-approved.
+
+Scheduled change monitoring: `POST /api/cron/refetch` (Bearer `CRON_SECRET`)
+or `npm run cron:refetch` re-checks every source whose per-source refresh
+interval has elapsed.
+
+## Reminders
+
+Signed-in users can add a reminder on any task with a computed deadline
+(7 days before, or immediately when closer). Dispatch runs via
+`POST /api/cron/reminders` or `npm run cron:reminders` through a mail
+abstraction: `EMAIL_PROVIDER=console` (dev, logs only) or `resend-compat`
+(any Resend-compatible HTTP API).
+
+## Document upload (beta)
+
+`/upload` analyses official letters: PDF (text layer) or plain text, up to
+10 MB. It extracts Swiss-format dates with payment/objection context, CHF
+amounts, matches the issuing authority against the directory, and suggests the
+matching workflow via the same classifier as typed queries. Only the extracted
+text and analysis are stored — deletable anytime, purged with the account, and
+guest uploads are removed when their session ends. Scanned images (OCR) are
+not supported yet and fail with honest guidance.
+
+## Languages
+
+The product UI ships in EN/DE/FR/IT (footer switcher, cookie-based, falling
+back to the profile language). Clarification questions and answer summaries
+follow the detected query language. Authority names are never translated.
+Rule content (task titles/descriptions) is authored in English — localising
+rule templates is the next content milestone.
+
+## Public guides
+
+Curated SEO entry pages (`/moving-to-basel`, `/having-a-baby-switzerland`, …,
+index at `/guides`) render the same checklist the rules engine produces — no
+hand-written administrative claims, no mass generation. Each page sets robots
+`noindex` until every source it cites is human-verified.
 
 ## Testing
 
@@ -152,17 +196,19 @@ an end-to-end integration suite that runs the full orchestrator (classify →
 clarify → rules → retrieval → persisted checklist with citations) against an
 isolated embedded Postgres.
 
-## Honest limitations (MVP)
+## Honest limitations
 
-- Seeded source summaries point at real official domains but were written
-  during development; they ship as `seed_demo` and must be verified through
-  the ingestion pipeline before the product labels them verified.
-- The deterministic classifier handles the seeded scenarios well but is not a
-  substitute for the Apertus provider on free-form input.
-- The hash embedder is lexical, not semantic — swap in a real embeddings
-  endpoint for production retrieval quality.
-- Reminders, document upload ("what does this letter mean?"), scheduled
-  re-fetching and SEO knowledge pages are architected (tables/design in place)
-  but not enabled.
-- UI ships in English; the i18n catalogue structure (EN/DE/FR/IT) exists in
-  `src/lib/i18n`.
+- 17 of 19 core sources hold content fetched live from the official sites and
+  await one-click human verification in `/admin/sources`; SwissPass and SBB
+  block automated fetching (HTTP 403) and keep their labelled seed summaries.
+- Connecting Apertus requires an endpoint + API key (`APERTUS_*` env). The
+  deterministic baseline scores 100% on the labelled evaluation set but that
+  set is a regression floor, not a robustness proof — run
+  `npm run eval:classification` against the live endpoint before enabling it.
+- The hash embedder is lexical, not semantic. Configure a real embeddings
+  endpoint and run `npm run db:reindex`; chunks not yet re-indexed degrade to
+  keyword search rather than mixing vector spaces.
+- Rule content (task titles/descriptions) is English; UI chrome, questions
+  and summaries are fully localised.
+- Document upload has no OCR — scanned letters are rejected with guidance.
+- Guide pages stay `noindex` until their sources are human-verified.

@@ -17,6 +17,7 @@ export async function Footer() {
             <Link href="/how-it-works" className="hover:text-ink transition-colors">{t(locale, "nav.howItWorks")}</Link>
             <Link href="/life-events" className="hover:text-ink transition-colors">{t(locale, "nav.lifeEvents")}</Link>
             <Link href="/sources" className="hover:text-ink transition-colors">{t(locale, "nav.sources")}</Link>
+            <Link href="/guides" className="hover:text-ink transition-colors">Guides</Link>
             <Link href="/settings" className="hover:text-ink transition-colors">{t(locale, "footer.privacy")}</Link>
           </nav>
           <LocaleSwitcher current={locale} />
