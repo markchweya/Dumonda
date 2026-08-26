@@ -1,0 +1,41 @@
+{
+  "name": "dumonda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dumonda — AI-powered life-navigation assistant for Switzerland. Tell Dumonda what happened; it tells you what to do next.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/lib/db/migrate-cli.ts",
+    "db:seed": "tsx src/lib/db/seed-cli.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.4",
+    "drizzle-orm": "^0.44.2",
+    "lucide-react": "^0.525.0",
+    "next": "^15.5.4",
+    "postgres": "^3.4.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "drizzle-kit": "^0.31.1",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "^15.5.4",
+    "tailwindcss": "^4.1.11",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
