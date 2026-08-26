@@ -14,6 +14,7 @@
     "eval:classification": "tsx scripts/eval-classification.ts",
     "ingest:all": "tsx scripts/ingest-all.ts",
     "cron:refetch": "tsx scripts/refetch-due.ts",
+    "cron:reminders": "tsx scripts/dispatch-reminders.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate-cli.ts",
     "db:seed": "tsx src/lib/db/seed-cli.ts",

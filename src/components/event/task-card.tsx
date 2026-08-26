@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Building2, CalendarClock, Check, FileText, MessageCircleQuestion, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Bell, Building2, CalendarClock, Check, FileText, MessageCircleQuestion, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge, Card, PRIORITY_LABEL, cn } from "@/components/ui";
 import { SourceDrawer, verificationLabel, type SourceInfo } from "./source-drawer";
@@ -22,11 +22,33 @@ export interface TaskView {
   sources: SourceInfo[];
 }
 
-export function TaskCard({ task }: { task: TaskView }) {
+export function TaskCard({ task, signedIn = false }: { task: TaskView; signedIn?: boolean }) {
   const router = useRouter();
   const [status, setStatus] = useState(task.status);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [reminder, setReminder] = useState<"idle" | "saving" | "set" | "needs_account">("idle");
+
+  async function setReminderForTask() {
+    if (reminder === "saving" || reminder === "set") return;
+    if (!signedIn) {
+      setReminder("needs_account");
+      return;
+    }
+    setReminder("saving");
+    try {
+      const res = await fetch("/api/reminders", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ taskId: task.id }),
+      });
+      if (res.status === 401) setReminder("needs_account");
+      else if (res.ok) setReminder("set");
+      else setReminder("idle");
+    } catch {
+      setReminder("idle");
+    }
+  }
 
   const done = status === "completed";
   const notApplicable = status === "not_applicable";
@@ -128,6 +150,26 @@ export function TaskCard({ task }: { task: TaskView }) {
               <MessageCircleQuestion className="h-4 w-4" />
               Ask Dumonda
             </Link>
+            {task.deadlineIso && !done && !notApplicable && (
+              reminder === "needs_account" ? (
+                <Link href="/signup" className="text-ink-soft underline underline-offset-4 hover:text-ink">
+                  Create an account to get reminders
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={setReminderForTask}
+                  disabled={reminder === "saving" || reminder === "set"}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 transition-colors cursor-pointer",
+                    reminder === "set" ? "text-verified" : "text-ink-soft hover:text-ink",
+                  )}
+                >
+                  <Bell className="h-4 w-4" />
+                  {reminder === "set" ? "Reminder set" : reminder === "saving" ? "Setting…" : "Remind me"}
+                </button>
+              )
+            )}
             {!done && (
               <button
                 type="button"

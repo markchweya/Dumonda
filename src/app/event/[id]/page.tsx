@@ -172,7 +172,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               </div>
               <div className="mt-3 space-y-3">
                 {sectionTasks.map((t) => (
-                  <TaskCard key={t.id} task={t} />
+                  <TaskCard key={t.id} task={t} signedIn={!!session.userId} />
                 ))}
               </div>
             </section>
