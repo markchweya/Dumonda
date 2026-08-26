@@ -12,9 +12,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval:classification": "tsx scripts/eval-classification.ts",
+    "ingest:all": "tsx scripts/ingest-all.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate-cli.ts",
-    "db:seed": "tsx src/lib/db/seed-cli.ts"
+    "db:seed": "tsx src/lib/db/seed-cli.ts",
+    "db:sync-urls": "tsx scripts/sync-source-urls.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.4",

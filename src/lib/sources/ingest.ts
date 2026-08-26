@@ -99,11 +99,19 @@ export interface IngestResult {
 
 /**
  * Fetches a registered source, extracts + chunks + embeds its text, and
- * detects content changes against the stored checksum. Changed sources are
- * NOT silently replaced: a review item is created and the source is marked
- * pending_review until an admin approves it.
+ * detects content changes against the stored checksum.
+ *
+ * Change guard: once a source has been fetched from the live site
+ * (fetchedAt set), later fetches with different content are NOT applied —
+ * a review item is created and the source is marked pending_review until an
+ * admin accepts the change (which re-runs this with applyChanges=true).
+ * The first live fetch of a seeded source applies directly: the seed text was
+ * written during development and was never a live snapshot worth protecting.
  */
-export async function ingestSource(sourceId: string): Promise<IngestResult> {
+export async function ingestSource(
+  sourceId: string,
+  opts: { applyChanges?: boolean } = {},
+): Promise<IngestResult> {
   const db = await getDb();
   const [source] = await db
     .select()
@@ -136,9 +144,11 @@ export async function ingestSource(sourceId: string): Promise<IngestResult> {
   const checksum = checksumOf(text);
   const now = new Date();
   const previousChecksum = source.checksum;
-  const changed = previousChecksum !== null && previousChecksum !== checksum;
+  const hadLiveFetch = source.fetchedAt !== null;
+  const changed =
+    hadLiveFetch && previousChecksum !== null && previousChecksum !== checksum;
 
-  if (changed) {
+  if (changed && !opts.applyChanges) {
     // Never silently replace content behind existing rules — queue for review.
     const ai = getAIProvider();
     const assessment = await ai.summariseSourceChange(source.extractedText ?? "", text);
@@ -192,7 +202,9 @@ export async function ingestSource(sourceId: string): Promise<IngestResult> {
       checksum,
       fetchedAt: now,
       updatedAt: now,
-      verification: source.verification === "verified" ? "verified" : "pending_review",
+      // Applied changes always demote to pending until a human re-verifies.
+      verification:
+        !changed && source.verification === "verified" ? "verified" : "pending_review",
     })
     .where(eq(schema.sources.id, source.id));
 

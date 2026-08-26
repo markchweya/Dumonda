@@ -98,9 +98,9 @@ export async function resolveChangeAction(
     .set({ status, reviewedBy: session.email, reviewedAt: new Date() })
     .where(eq(schema.sourceChangeEvents.id, changeId));
   if (status === "accepted") {
-    // Accepting the change re-ingests the source so chunks reflect the new
-    // content; verification returns to pending until a human re-verifies.
-    await ingestSource(change.sourceId);
+    // Accepting applies the new content (chunks rebuilt, checksum updated);
+    // verification returns to pending until a human re-verifies.
+    await ingestSource(change.sourceId, { applyChanges: true });
   }
   revalidatePath("/admin/review");
 }
