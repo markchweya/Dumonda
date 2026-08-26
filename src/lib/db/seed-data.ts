@@ -139,6 +139,20 @@ export const SEED_AUTHORITIES: SeedAuthority[] = [
     supportedServices: ["swiss_abroad", "departure"],
   },
   {
+    id: "auth_seco",
+    name: "State Secretariat for Economic Affairs (SECO)",
+    level: "federal",
+    officialDomain: "www.seco.admin.ch",
+    supportedServices: ["labour_law", "employee_protection"],
+  },
+  {
+    id: "auth_fedlex",
+    name: "Fedlex — official publication platform for federal law",
+    level: "federal",
+    officialDomain: "www.fedlex.admin.ch",
+    supportedServices: ["federal_law"],
+  },
+  {
     id: "auth_swisspass",
     name: "SwissPass / Alliance SwissPass",
     level: "private_public_service",
@@ -396,6 +410,32 @@ export const SEED_SOURCES: SeedSource[] = [
     eventTags: ["fine_received"],
     extractedText:
       "Fixed-penalty fines (Ordnungsbussen) for minor offences such as parking or minor speeding are issued under the Fixed Penalties Act. The document you receive states the amount, the payment deadline and the payment method. Paying within the deadline normally closes the procedure without an entry in the criminal record. If you do not pay, ordinary criminal proceedings may follow with additional costs. Whether and how you can contest a fine, and within what period, is stated on the document itself; the stated authority is the competent contact. For penalty orders (Strafbefehl) a written objection within the period stated on the order is required.",
+  },
+  {
+    id: "src_seco_care_leave",
+    title: "Caring for a sick child — employee rights (labour law)",
+    authorityId: "auth_seco",
+    authorityName: "State Secretariat for Economic Affairs (SECO)",
+    authorityLevel: "federal",
+    url: "https://www.seco.admin.ch/",
+    sourceType: "federal_government",
+    language: "en",
+    eventTags: ["child_sick"],
+    extractedText:
+      "Employees are entitled to paid leave to care for a family member with a health impairment: the time necessary for the care, up to three days per event and, for family members other than their own children, at most ten days per year (Code of Obligations Art. 329h). For their own sick children the three-days-per-event limit applies per illness; the employer may request a medical certificate. Separately, parents of a minor child whose health is seriously impaired by illness or accident are entitled to a paid care leave of up to 14 weeks, compensated through the loss-of-earnings scheme (EO), to be taken within an 18-month framework period (Art. 329i).",
+  },
+  {
+    id: "src_fedlex_or_care",
+    title: "Code of Obligations — leave to care for family members (Art. 329h/329i)",
+    authorityId: "auth_fedlex",
+    authorityName: "Fedlex (official publication platform for federal law)",
+    authorityLevel: "federal",
+    url: "https://www.fedlex.admin.ch/",
+    sourceType: "federal_law",
+    language: "en",
+    eventTags: ["child_sick"],
+    extractedText:
+      "The Swiss Code of Obligations governs employees' leave for caring for family members. Art. 329h grants paid leave for the time needed to care for a family member or partner with a health impairment, limited to three days per event and a maximum of ten days per year; the yearly cap does not apply to care for the employee's own children. Art. 329i grants employees whose minor child is seriously impaired in health by illness or accident a care leave of at most 14 weeks, to be drawn within 18 months, with compensation under the loss-of-earnings scheme.",
   },
   {
     id: "src_estv_tax",
@@ -756,6 +796,102 @@ export const SEED_RULES: RuleDef[] = [
         authorityName: "Civil register office",
         authorityLevel: "cantonal",
         sourceIds: ["src_chch_baby"],
+      },
+    ],
+  },
+
+  // CHILD SICK ───────────────────────────────────────────────────────────────
+  {
+    id: "rule_child_sick_core",
+    eventType: "child_sick",
+    jurisdiction: "CH",
+    conditions: always,
+    version: 1,
+    active: true,
+    sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+    actions: [
+      {
+        title: "Get medical help if needed",
+        description:
+          "Contact your paediatrician or family doctor; outside office hours use your region's medical on-call service (call 144 in an emergency). Treatment for children is covered by their compulsory health insurance.",
+        category: "health",
+        priority: "information",
+        authorityName: "Your paediatrician / medical on-call service",
+        authorityLevel: "private_public_service",
+        sourceIds: [],
+      },
+      {
+        title: "Inform the school or daycare",
+        description:
+          "Report the absence to your child's school or daycare following their notification procedure, usually on the first morning of absence.",
+        category: "family",
+        priority: "recommended",
+        authorityName: "School / daycare",
+        authorityLevel: "municipal",
+        sourceIds: [],
+      },
+    ],
+  },
+  {
+    id: "rule_child_sick_employed",
+    eventType: "child_sick",
+    jurisdiction: "CH",
+    conditions: { fact: "employment_status", op: "in", value: ["employed"] },
+    version: 1,
+    active: true,
+    sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+    actions: [
+      {
+        title: "Take paid leave to care for your child",
+        description:
+          "As an employee you are entitled to paid leave for the time needed to care for your sick child, up to 3 days per illness (Code of Obligations Art. 329h). Inform your employer promptly; a medical certificate may be requested.",
+        category: "work",
+        priority: "information",
+        authorityName: "Your employer",
+        authorityLevel: "private_public_service",
+        sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+      },
+    ],
+  },
+  {
+    id: "rule_child_sick_employment_unknown",
+    eventType: "child_sick",
+    jurisdiction: "CH",
+    conditions: { fact: "employment_status", op: "not_exists" },
+    version: 1,
+    active: true,
+    sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+    actions: [
+      {
+        title: "If you are employed: paid leave to care for your child",
+        description:
+          "Employees are entitled to paid leave for the time needed to care for a sick child, up to 3 days per illness (Code of Obligations Art. 329h). Inform your employer promptly; a medical certificate may be requested.",
+        category: "work",
+        priority: "may_apply",
+        authorityName: "Your employer",
+        authorityLevel: "private_public_service",
+        sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+      },
+    ],
+  },
+  {
+    id: "rule_child_sick_serious",
+    eventType: "child_sick",
+    jurisdiction: "CH",
+    conditions: always,
+    version: 1,
+    active: true,
+    sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
+    actions: [
+      {
+        title: "Seriously ill child: up to 14 weeks of paid care leave",
+        description:
+          "If your minor child's health is seriously impaired by illness or accident, working parents are entitled to a care leave of up to 14 weeks within 18 months, compensated through the loss-of-earnings scheme (EO). The claim runs via the AHV compensation office.",
+        category: "work",
+        priority: "may_apply",
+        authorityName: "AHV compensation office / your employer",
+        authorityLevel: "federal",
+        sourceIds: ["src_seco_care_leave", "src_fedlex_or_care"],
       },
     ],
   },

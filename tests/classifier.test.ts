@@ -15,6 +15,8 @@ describe("deterministic classification", () => {
     ["I just finished high school", "finish_high_school"],
     ["I'm moving out of Switzerland", "leave_switzerland"],
     ["I bought a car", "buy_vehicle"],
+    ["what if my child falls sick?", "child_sick"],
+    ["my daughter is sick and I need to stay home", "child_sick"],
   ];
 
   for (const [query, expected] of cases) {

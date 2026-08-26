@@ -7,7 +7,8 @@ import { newId } from "@/lib/ids";
 import { retrievePassages } from "@/lib/retrieval/hybrid";
 import { findCantonsInText } from "@/lib/swiss/cantons";
 import { localisedFactQuestion } from "@/lib/i18n/facts";
-import type { Locale } from "@/lib/i18n";
+import { t, type Locale } from "@/lib/i18n";
+import { suggestEvents, type EventSuggestion } from "@/lib/events/suggest";
 import { evaluateRules } from "@/lib/rules/engine";
 import type { ConditionNode, DeadlineSpec, RuleDef, TaskTemplate } from "@/lib/rules/types";
 
@@ -24,6 +25,8 @@ export interface AskResult {
   eventTitle?: string;
   questions?: { fact: FactKey; question: string; whyWeAsk: string; options?: { value: string; label: string }[]; input?: "text" | "date" }[];
   message?: string;
+  /** nearest known situations, offered (not asserted) when nothing matched */
+  suggestions?: EventSuggestion[];
 }
 
 /** Facts referenced by a rule's conditions or deadline anchors. */
@@ -125,11 +128,12 @@ export async function processQuery(
   await track("search", { recognised: !classification.unrecognised });
 
   if (classification.unrecognised || !getEventType(classification.eventType)) {
-    await track("unanswered_query", {});
+    const suggestions = suggestEvents(query);
+    await track("unanswered_query", { suggestions: suggestions.length });
     return {
       kind: "unrecognised",
-      message:
-        "I couldn't match this to a situation I can reliably help with yet. Try describing what happened in a sentence — for example \"I moved from Zürich to Basel\" or \"my B permit expires soon\". Your question has been recorded so we can add this situation.",
+      message: t(classification.language, "ask.noMatch"),
+      suggestions,
     };
   }
 

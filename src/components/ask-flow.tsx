@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CornerDownLeft, Loader2 } from "lucide-react";
 import { Button, Card, Input, cn } from "@/components/ui";
@@ -20,6 +21,7 @@ interface AskResponse {
   eventTitle?: string;
   questions?: Question[];
   message?: string;
+  suggestions?: { eventType: string; title: string; query: string }[];
 }
 
 export function AskFlow({
@@ -40,6 +42,7 @@ export function AskFlow({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<{ eventType: string; title: string; query: string }[]>([]);
   const started = useRef(false);
 
   async function handleResponse(data: AskResponse) {
@@ -57,6 +60,7 @@ export function AskFlow({
       return;
     }
     setMessage(data.message ?? "Something went wrong. Please try again.");
+    setSuggestions(data.suggestions ?? []);
     setPhase("unrecognised");
   }
 
@@ -216,8 +220,35 @@ export function AskFlow({
         </div>
       </form>
       {phase === "unrecognised" && message && (
-        <Card className="mt-4 border-amber-ink/20 bg-amber-soft p-4 text-sm text-amber-ink">
-          {message}
+        <Card className="mt-4 p-5">
+          <p className="text-sm text-ink-soft">{message}</p>
+          {suggestions.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium">{t(locale, "ask.didYouMean")}</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.eventType}
+                    type="button"
+                    onClick={() => {
+                      setQuery(s.query);
+                      setPhase("input");
+                      void submitQuery(s.query);
+                    }}
+                    className="rounded-xl border border-line bg-card px-3.5 py-2 text-sm transition-colors hover:border-ink/30 cursor-pointer"
+                  >
+                    {s.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <Link
+            href="/life-events"
+            className="mt-4 inline-block text-sm font-medium underline underline-offset-4 hover:text-ink-soft"
+          >
+            {t(locale, "ask.browseAll")}
+          </Link>
         </Card>
       )}
     </div>

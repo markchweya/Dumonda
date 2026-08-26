@@ -64,6 +64,10 @@ const en = {
   "ask.startOver": "Start over",
   "ask.continue": "Continue",
   "ask.typeAnswer": "Type your answer",
+  "ask.noMatch":
+    "I couldn't match this to a situation I can reliably help with yet — and rather than guess, I won't. Your question has been recorded so we can add it.",
+  "ask.didYouMean": "Is one of these close to your situation?",
+  "ask.browseAll": "Browse all life events",
   "ask.uploadHint": "Got an official letter instead?",
   "ask.uploadLink": "Upload it",
   "ask.uploadHintEnd": "and we'll work out what it is.",
@@ -176,6 +180,10 @@ const de: Partial<Record<MessageKey, string>> = {
   "ask.startOver": "Neu beginnen",
   "ask.continue": "Weiter",
   "ask.typeAnswer": "Antwort eingeben",
+  "ask.noMatch":
+    "Ich konnte das keiner Situation zuordnen, bei der ich zuverlässig helfen kann — und statt zu raten, lasse ich es. Deine Frage wurde erfasst, damit wir sie ergänzen können.",
+  "ask.didYouMean": "Kommt eine dieser Situationen deiner nahe?",
+  "ask.browseAll": "Alle Lebensereignisse ansehen",
   "ask.uploadHint": "Stattdessen einen amtlichen Brief erhalten?",
   "ask.uploadLink": "Lade ihn hoch",
   "ask.uploadHintEnd": "— wir finden heraus, worum es geht.",
@@ -276,6 +284,10 @@ const fr: Partial<Record<MessageKey, string>> = {
   "ask.startOver": "Recommencer",
   "ask.continue": "Continuer",
   "ask.typeAnswer": "Votre réponse",
+  "ask.noMatch":
+    "Je n'ai pas pu rattacher cela à une situation où je peux aider de manière fiable — et plutôt que de deviner, je m'abstiens. Votre question a été enregistrée pour que nous l'ajoutions.",
+  "ask.didYouMean": "L'une de ces situations est-elle proche de la vôtre ?",
+  "ask.browseAll": "Voir tous les événements de vie",
   "ask.uploadHint": "Vous avez reçu un courrier officiel ?",
   "ask.uploadLink": "Téléversez-le",
   "ask.uploadHintEnd": "et nous déterminerons de quoi il s'agit.",
@@ -376,6 +388,10 @@ const it: Partial<Record<MessageKey, string>> = {
   "ask.startOver": "Ricomincia",
   "ask.continue": "Continua",
   "ask.typeAnswer": "La tua risposta",
+  "ask.noMatch":
+    "Non sono riuscito a collegarlo a una situazione in cui posso aiutare in modo affidabile — e invece di indovinare, preferisco non farlo. La tua domanda è stata registrata così potremo aggiungerla.",
+  "ask.didYouMean": "Una di queste situazioni è vicina alla tua?",
+  "ask.browseAll": "Sfoglia tutti gli eventi della vita",
   "ask.uploadHint": "Hai ricevuto una lettera ufficiale?",
   "ask.uploadLink": "Caricala",
   "ask.uploadHintEnd": "e capiremo di cosa si tratta.",

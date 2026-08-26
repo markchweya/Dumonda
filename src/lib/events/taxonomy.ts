@@ -331,6 +331,19 @@ export const EVENT_TYPES: EventTypeDef[] = [
     keywords: ["had a baby", "gave birth", "newborn", "new baby", "was born", "expecting", "just had a child", "avuto un bambino", "bébé", "baby bekommen"],
   },
   {
+    id: "child_sick",
+    category: "FAMILY",
+    title: "Child is sick",
+    description: "Your child is ill and you need to organise care, work leave or medical help.",
+    relevantFacts: ["employment_status", "children_school_age", "canton"],
+    keywords: [
+      "child is sick", "child falls sick", "falls sick", "kid is sick", "sick child",
+      "my child is ill", "daughter is sick", "son is sick", "child has a fever",
+      "care for my sick child", "kind ist krank", "enfant malade", "figlio malato",
+      "mio figlio è malato", "mon enfant est malade",
+    ],
+  },
+  {
     id: "marriage",
     category: "FAMILY",
     title: "Getting married",
