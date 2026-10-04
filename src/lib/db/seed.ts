@@ -7,6 +7,7 @@ import { chunkText, checksumOf } from "@/lib/sources/ingest";
 import { getEmbedder } from "@/lib/retrieval/embeddings";
 import { hashPassword } from "@/lib/auth";
 import { newId } from "@/lib/ids";
+import { adminCredentials } from "./admin-credentials";
 
 /**
  * Seeds reference data (jurisdictions, authorities, sources, rules) and the
@@ -22,6 +23,12 @@ export async function seedIfEmpty(db: Db) {
 }
 
 export async function runSeed(db: Db) {
+  // Admin account for /admin: from ADMIN_EMAIL / ADMIN_PASSWORD, with the
+  // documented defaults allowed only on the embedded dev database. Checked
+  // before anything is written: a seed that failed halfway would leave the
+  // reference data in place, and seedIfEmpty would never come back for the
+  // admin account.
+  const { email: adminEmail, password: adminPassword } = adminCredentials();
   const now = new Date();
   const allAuthorities = [...SEED_AUTHORITIES, ...CANTONAL_AUTHORITIES];
   const allSources = [...SEED_SOURCES, ...CANTONAL_SOURCES];
@@ -114,9 +121,6 @@ export async function runSeed(db: Db) {
       .onConflictDoNothing();
   }
 
-  // Admin account for /admin (credentials from env; dev defaults documented).
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@dumonda.local";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "dumonda-admin-dev";
   await db
     .insert(schema.users)
     .values({
