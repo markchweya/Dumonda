@@ -37,6 +37,7 @@ npm run build                # production build
 npm run db:generate          # regenerate SQL migrations after schema changes
 npm run db:migrate           # apply migrations explicitly
 npm run db:seed              # seed reference data explicitly
+npm run db:setup             # migrate + seed once; what a new hosted database needs
 npm run db:sync-urls         # sync corrected source URLs into an existing db
 npm run db:reindex           # re-embed all chunks with the configured embedder
 npm run ingest:all           # fetch + index every registered source (rate-limited)
@@ -52,6 +53,12 @@ CLI database commands (`db:seed`, `ingest:all`, `cron:refetch`, `db:reindex`)
 while `npm run dev` is running, restart the dev server afterwards so it picks
 up the changes — or stop it first. Production Postgres has no such
 restriction.
+
+## Deploying
+
+Production runs on Vercel with a hosted Postgres (pgvector) at
+[dumonda.olkeri.space](https://dumonda.olkeri.space). Step by step, with the
+environment variables and scheduled jobs: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Configuration
 

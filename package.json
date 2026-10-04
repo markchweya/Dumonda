@@ -2,7 +2,7 @@
   "name": "dumonda",
   "version": "0.1.0",
   "private": true,
-  "description": "Dumonda — AI-powered life-navigation assistant for Switzerland. Tell Dumonda what happened; it tells you what to do next.",
+  "description": "Dumonda \u2014 AI-powered life-navigation assistant for Switzerland. Tell Dumonda what happened; it tells you what to do next.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -21,6 +21,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate-cli.ts",
     "db:seed": "tsx src/lib/db/seed-cli.ts",
+    "db:setup": "tsx src/lib/db/setup-cli.ts",
     "db:sync-urls": "tsx scripts/sync-source-urls.ts",
     "db:reindex": "tsx scripts/reindex-embeddings.ts"
   },
@@ -47,5 +48,8 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }

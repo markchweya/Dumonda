@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { embeddedDatabaseProblem, poolOptions } from "./config";
 import * as schema from "./schema";
 
 export type Db =
@@ -28,9 +29,12 @@ async function createDb(): Promise<Db> {
   if (url && url.trim().length > 0) {
     const { drizzle } = await import("drizzle-orm/postgres-js");
     const postgres = (await import("postgres")).default;
-    const client = postgres(url, { max: 10 });
+    const client = postgres(url, poolOptions(url));
     return drizzle(client, { schema });
   }
+
+  const problem = embeddedDatabaseProblem();
+  if (problem) throw new Error(problem);
 
   const { PGlite } = await import("@electric-sql/pglite");
   const { vector } = await import("@electric-sql/pglite/vector");

@@ -25,3 +25,9 @@ export async function POST(req: NextRequest) {
   const summary = await refetchDueSources();
   return NextResponse.json(summary);
 }
+
+/**
+ * Vercel Cron calls with GET and the same bearer token (it sends
+ * CRON_SECRET for you); see vercel.json. Other schedulers may POST.
+ */
+export const GET = POST;
