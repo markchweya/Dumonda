@@ -100,6 +100,74 @@ export function buildClaude() {
   return { root, body, tail, eyes, mouth, arm, leg };
 }
 
+// ------------------------------------------------------------------ Lena: the Dumonda resident, new to Switzerland
+// Nia's rig and proportions exactly (so every pose, wave and mouth position keeps working), with her own
+// look: olive skin, chestnut bob under a cream beanie, denim jacket, loden-green scarf, no glasses.
+export function buildResident() {
+  const skin = clay(0xd49a6e, { r: .52, b: .5 }), skinD = clay(0xb07a4e, { r: .6, b: .5 }), jacket = clay(0x4a6fa5, { r: .8 }), jacketD = clay(0x3a5784, { r: .85 });
+  const hair = clay(0x4a2f1d, { r: .9, b: 3 }), jeans = clay(0x3b3a45, { r: .85 }), gold = new T.MeshStandardMaterial({ color: 0xe7b84b, roughness: .25, metalness: .85 });
+  const beanieM = clay(0xf0e8d6, { r: .95, b: 2 }), scarfM = clay(0x3f6e52, { r: .95, b: 2.4 });
+  const root = new T.Group(); root.position.set(-.55, .52, .16); root.rotation.y = .5;
+  const ch = clay(0x2c6e6a, { r: .6 }), metal = new T.MeshStandardMaterial({ color: 0x33353c, roughness: .35, metalness: .5 });
+  const chair = new T.Group(); chair.position.set(-.55, 0, .16); chair.rotation.y = .5;
+  chair.add(box(.52, .085, .48, ch, 0, .46, 0, .04), box(.48, .6, .085, ch, 0, .86, -.27, .04), cyl(.028, .028, .4, metal, 0, .25, -.02));
+  for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283, l = box(.3, .03, .05, metal, Math.cos(a) * .15, .07, Math.sin(a) * .15, .012); l.rotation.y = -a; chair.add(l, mesh(new T.SphereGeometry(.033, 14, 10), metal, Math.cos(a) * .3, .033, Math.sin(a) * .3)); }
+  for (const s of [-1, 1]) {
+    const th = mesh(limb(.085, .07, .4), jeans, s * .09, 0, .02); th.rotation.x = -1.5; root.add(th);
+    root.add(mesh(new T.SphereGeometry(.07, 16, 12), jeans, s * .09, -.01, .41));
+    const sh = mesh(limb(.066, .054, .42), jeans, s * .09, -.01, .41); sh.rotation.x = .08; root.add(sh);
+    root.add(mesh(blob(.058, .05, .115), clay(0xc8574a, { r: .55 }), s * .09, -.45, .46));
+  }
+  root.add(mesh(blob(.175, .1, .15), jeans, 0, .01, .03));
+  const torso = new T.Group(); root.add(torso);
+  const tg = blob(.19, .3, .135, (v, u) => { const k = u.y > .5 ? 1 - (u.y - .5) * .55 : 1 - Math.max(0, -u.y - .55) * .25; v.x *= k; v.z *= k; }, 16);
+  torso.add(mesh(tg, jacket, 0, .26, 0));
+  // loden scarf looped at the collar, one tail hanging down the front
+  const sc = mesh(new T.TorusGeometry(.095, .038, 14, 24), scarfM, 0, .53, -.01); sc.rotation.x = 1.3; torso.add(sc);
+  const tail2 = box(.085, .2, .035, scarfM, .055, .4, .128, .014); tail2.rotation.z = -.08; torso.add(tail2);
+  for (const s of [-1, 1]) { const seam = cyl(.005, .005, .2, jacketD, s * .095, .33, .131, 8); seam.rotation.x = -.1; torso.add(seam); }
+  const arm = {};
+  for (const s of [-1, 1]) {
+    const sh = new T.Group(); sh.position.set(s * .185, .435, 0); torso.add(sh);
+    sh.add(mesh(new T.SphereGeometry(.07, 18, 14), jacket), mesh(limb(.065, .054, .25), jacket));
+    const el = new T.Group(); el.position.y = -.25; sh.add(el);
+    el.add(mesh(new T.SphereGeometry(.054, 16, 12), jacket), mesh(limb(.054, .042, .23), jacket));
+    const wr = new T.Group(); wr.position.y = -.24; el.add(wr);
+    wr.add(mesh(blob(.047, .056, .027), skin, 0, -.043, 0));
+    const th = mesh(blob(.015, .03, .015), skin, -s * .042, -.033, .012); th.rotation.z = -s * .7; wr.add(th);
+    arm[s] = { sh, el, wr };
+  }
+  torso.add(mesh(limb(.056, .062, .09), skinD, 0, .62, 0));
+  const headPivot = new T.Group(); headPivot.position.set(0, .585, .005); torso.add(headPivot);
+  const head = new T.Group(); head.position.y = .19; headPivot.add(head);
+  head.add(mesh(blob(.166, .2, .157, (v, u) => { if (u.y < 0) { const k = 1 - .36 * Math.pow(-u.y, 1.6); v.x *= k; v.z *= 1 - .1 * -u.y; } }), skin));
+  for (const s of [-1, 1]) {
+    head.add(mesh(blob(.02, .032, .02), skinD, s * .161, -.008, -.006));
+    head.add(mesh(new T.SphereGeometry(.009, 10, 8), gold, s * .168, -.028, -.004));
+    head.add(mesh(new T.CircleGeometry(.03, 22), new T.MeshBasicMaterial({ color: 0xd9674a, transparent: true, opacity: .22, depthWrite: false }), s * .098, -.058, .126, false, false));
+  }
+  head.add(mesh(blob(.022, .022, .024), skinD, 0, -.036, .153));
+  // chestnut bob: a wrap of hair under a slouchy cream beanie, fringe over the brow
+  head.add(mesh(blob(.172, .15, .165, null, 10), hair, 0, .09, -.02));
+  for (const s of [-1, 1]) head.add(mesh(blob(.055, .11, .05, null, 10), hair, s * .14, -.03, .02));
+  head.add(mesh(blob(.15, .045, .1, null, 10), hair, 0, .145, .085));
+  const brim = mesh(new T.TorusGeometry(.142, .035, 12, 26), beanieM, 0, .155, -.01); brim.rotation.x = 1.42; head.add(brim);
+  head.add(mesh(blob(.158, .125, .15, (v, u) => { if (u.y > .6) { const k = 1 - (u.y - .6) * .35; v.x *= k; v.z *= k; } }, 10), beanieM, 0, .225, -.012));
+  head.add(mesh(blob(.045, .045, .045, null, 8), beanieM, 0, .36, -.015));
+  const eyeW = new T.MeshStandardMaterial({ color: 0xf8f4ec, roughness: .25 }), pup = new T.MeshStandardMaterial({ color: 0x140d0a, roughness: .12 });
+  const eyes = {};
+  for (const s of [-1, 1]) {
+    const e = new T.Group(); e.position.set(s * .067, .018, .13); head.add(e);
+    const ball = mesh(new T.SphereGeometry(.037, 24, 18), eyeW, 0, 0, 0, false); ball.scale.set(1, .96, .55); e.add(ball);
+    const p = mesh(new T.SphereGeometry(.02, 18, 14), pup, 0, 0, .015, false); p.scale.z = .48; e.add(p);
+    p.add(mesh(new T.SphereGeometry(.0058, 8, 8), new T.MeshBasicMaterial({ color: 0xffffff }), .006, .007, .018, false));
+    const brow = mesh(new T.CapsuleGeometry(.0072, .046, 4, 10), hair, s * .067, .082, .147, false); brow.rotation.z = 1.57; head.add(brow);
+    eyes[s] = { e, p, brow };
+  }
+  const mouth = mouthKit(head, { lip: 0x8a3c2e, inner: 0x2a0d0d, tongue: 0xb6524b });
+  return { root, chair, torso, headPivot, head, arm, eyes, mouth };
+}
+
 // ------------------------------------------------------------------ Dumi: a clay St. Bernard pup, the Dumonda guide
 // Swiss to the bone: the rescue dog that pulls you out of the bureaucracy avalanche. Paper-white and warm
 // brown clay (the app's palette), Dumonda red only on the collar and the tiny barrel. Same interface and

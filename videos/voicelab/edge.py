@@ -40,7 +40,7 @@ def tighten(a, sr, words, longest=.2):
 async def make(l):
     k = l["key"]; mp3, wav = f"{OUT}/{k}.mp3", f"{OUT}/{k}.wav"
     rate, pitch = TONE.get(l["emo"], ("+0%", "+0Hz"))
-    c = edge_tts.Communicate(l["say"], VOICE[l["who"]], rate=rate, pitch=pitch, boundary="WordBoundary")
+    c = edge_tts.Communicate(l["say"], l.get("voice") or VOICE[l["who"]], rate=rate, pitch=pitch, boundary="WordBoundary")
     words = []
     with open(mp3, "wb") as fh:
         async for ch in c.stream():

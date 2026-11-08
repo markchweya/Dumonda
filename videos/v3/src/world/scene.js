@@ -7,7 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { staticFile } from 'remotion';
-import { buildNia, buildClaude, buildDumi, poseNia, poseClaude, poseDumi } from './cast.js';
+import { buildNia, buildClaude, buildDumi, buildResident, poseNia, poseClaude, poseDumi } from './cast.js';
 import { THEMES } from './rooms.js';
 import { lerp, ease } from './kit.js';
 
@@ -39,9 +39,9 @@ export async function createScene(canvas, tl) {
   const key = new T.DirectionalLight(th.key[0], th.key[1]); key.position.set(...th.key[2]); key.target.position.set(0, 1, 0); scene.add(key, key.target);
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0005; key.shadow.normalBias = .014; key.shadow.radius = 6; Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3.5, bottom: -2, near: .5, far: 12 });
   const rim = new T.DirectionalLight(0xffe2c8, .7); rim.position.set(2.6, 2.6, -1.3); scene.add(rim);
-  // cast: 'dumonda' swaps the mascot seat for Dumi (the internal beat keys stay nia/claude)
+  // cast: 'dumonda' swaps in Lena the resident and Dumi the pup (the internal beat keys stay nia/claude)
   const dumonda = tl.cast === 'dumonda';
-  const nia = buildNia(), claude = dumonda ? buildDumi() : buildClaude(); scene.add(nia.chair, nia.root, claude.root);
+  const nia = dumonda ? buildResident() : buildNia(), claude = dumonda ? buildDumi() : buildClaude(); scene.add(nia.chair, nia.root, claude.root);
   const composer = new EffectComposer(renderer, new T.WebGLRenderTarget(W, H, { type: T.HalfFloatType, samples: 4 }));
   composer.addPass(new RenderPass(scene, cam));
   composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}', fragmentShader: 'varying vec2 vUv; uniform sampler2D tDiffuse; void main(){vec3 c=texture2D(tDiffuse,vUv).rgb; if(!(c.r==c.r&&c.g==c.g&&c.b==c.b)) c=vec3(0.); gl_FragColor=vec4(min(c,vec3(30.)),1.);}' }));

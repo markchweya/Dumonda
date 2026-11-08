@@ -12,7 +12,9 @@ const PRE = { ahem: '', hmm: 'Hmm.', uh: 'Uh,', oh: 'Oh.' }, SFX = { ahem: 'ahem
 const sfxSig = n => { const real = path.join(ROOT, 'sfx', n + '-real.wav'), f = fs.existsSync(real) ? real : path.join(ROOT, 'sfx', n + '.wav'); return n + fs.statSync(f).size; };
 const lines = script.beats.map(b => {
   const fx = b.pre && SFX[b.pre], say = (b.pre && PRE[b.pre] ? PRE[b.pre] + ' ' : '') + (b.say || b.text), emo = b.who === 'claude' ? (b.claude || 'neutral') : (b.nia || 'neutral');
-  return { who: b.who, say, emo, ...(fx && { sfx: fx }), key: crypto.createHash('md5').update(`cb2|${b.who}|${emo}|${say}|${fx ? sfxSig(fx) : ''}`).digest('hex').slice(0, 12) };
+  // script.voices = { claude: '<edge voice>', nia: '<edge voice>' } overrides the show's defaults (Dumonda episodes)
+  const voice = script.voices && script.voices[b.who];
+  return { who: b.who, say, emo, ...(fx && { sfx: fx }), ...(voice && { voice }), key: crypto.createHash('md5').update(`cb2|${b.who}|${voice || ''}|${emo}|${say}|${fx ? sfxSig(fx) : ''}`).digest('hex').slice(0, 12) };
 });
 fs.writeFileSync(path.join(work, 'lines.json'), JSON.stringify(lines));
 if (process.argv[3] === '--lines') { console.log(name, 'lines', lines.length); process.exit(0); }

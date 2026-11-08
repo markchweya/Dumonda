@@ -8,7 +8,7 @@ const V = {
   pose: ['rest', 'gesture', 'point', 'shrug', 'head', 'neck', 'chin', 'cheer', 'wave'], cpose: ['rest', 'point', 'palm', 'shrug', 'wave'],
   shot: ['two', 'nia', 'claude', 'low', 'side', 'high', 'over', 'dutch', 'top'], pre: ['ahem', 'hmm', 'uh', 'oh'], icon: ['git', 'chat', 'pen', 'book'],
 };
-const CLASSES = new Set('msg me ai list tag ok bad row wrap between code term g o y r dim gap doc quote sheet tile soft file stamp meter btn hot att thumb struck site light nav hero cards card bar page block li ics b c'.split(' '));
+const CLASSES = new Set('msg me ai list tag ok bad row wrap between code term g o y r dim gap doc quote sheet tile soft file stamp meter btn hot att thumb struck site light nav hero cards card bar page block li ics b c dmd dbar task cb on badge req may due src docs chip sel prog dmsg'.split(' '));
 const count = s => s.split(/\s+/).filter(Boolean).length;
 
 function lint(name) {

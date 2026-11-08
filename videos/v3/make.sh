@@ -27,7 +27,8 @@ for e in "$@"; do
   done
   [ -f v3/out/$e.mp4 ] || { echo "!! $e render failed"; continue; }
   upload $e
-  python -m whisper v3/out/phone/$e.mp4 --model base.en --output_dir v3/work/w --output_format txt --fp16 False --verbose False 2>/dev/null
+  # multilingual model so the speech check works for German episodes too
+  python -m whisper v3/out/phone/$e.mp4 --model base --output_dir v3/work/w --output_format txt --fp16 False --verbose False 2>/dev/null
   echo "== $e $(ffprobe -v error -show_entries format=duration -of csv=p=0 v3/out/phone/$e.mp4)s $(du -m v3/out/phone/$e.mp4 | cut -f1)MB"; tr '\n' ' ' < v3/work/w/$e.txt; echo
 done
 echo MAKEDONE

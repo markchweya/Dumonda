@@ -33,7 +33,7 @@ function Toast({ x, t, start, end, top }) {
   const q = back((t - start) / .34), o = ease((t - start) / .12) * (1 - ease((t - end + .3) / .3));
   return <div className={'toast ' + (x.tone || '')} style={{ top, opacity: o, transform: `translateY(${(1 - q) * -60}px) scale(${.92 + .08 * q})` }}>
     <div className='ic'><svg viewBox='0 0 24 24' fill='none' stroke='#fff' strokeWidth='2.2' strokeLinecap='round'>{ICON[x.icon]}</svg></div>
-    <div className='tx'><small>{x.app}</small><b>{x.text}</b></div><em>now</em>
+    <div className='tx'><small>{x.app}</small><b>{x.text}</b></div><em>{x.when || 'now'}</em>
   </div>;
 }
 
@@ -85,11 +85,11 @@ function Note({ tl, b, t, panelStart, rv, nextT }) {
 }
 
 // end card: the 3D scene keeps playing (both wave, camera swings round); the question slides up under them
-function Outro({ line, t }) {
+function Outro({ line, follow, t }) {
   const q = spring(t - .15), f = spring(t - .75), w = Math.sin(Math.max(0, t - .75) * 8) * 10 * Math.exp(-Math.max(0, t - .75) * 1.6);
   return <><div className="ofade" style={{ opacity: ease(t / .4) }} />
     <div className="obub" style={{ opacity: ease((t - .15) / .1), transform: `translateY(${(1 - q) * 700}px) rotate(${(1 - q) * 6 - 1.2}deg)` }}><i />{line}</div>
-    <div className="ofol" style={{ opacity: ease((t - .75) / .1), transform: `translateX(${(1 - f) * 900}px) rotate(${w}deg)` }}><b>+</b>Follow for more</div></>;
+    <div className="ofol" style={{ opacity: ease((t - .75) / .1), transform: `translateX(${(1 - f) * 900}px) rotate(${w}deg)` }}><b>+</b>{follow || 'Follow for more'}</div></>;
 }
 function Episode({ tl }) {
   const frame = useCurrentFrame(), t = frame / FPS, canvas = useRef(null), scene = useRef(null);
@@ -112,7 +112,7 @@ function Episode({ tl }) {
     {T0.hook && t < hookEnd ? <Hook h={T0.hook} t={t} end={hookEnd} /> : null}
     {tb && t >= Math.max(tb.start, .9) && t < hookEnd ? <Toast x={tb.toast} t={t} start={Math.max(tb.start, .9)} end={hookEnd} top={1190} /> : null}
     {chunk && out === null ? <div className={`cap-line ${cur.who} ${on ? 'lo' : ''}`} style={{ transform: `scale(${.96 + .04 * back((t - chunk.s) / .12)})` }}><div className='box'>{chunk.words.map((w, i) => <React.Fragment key={i}><span className={'w' + (t >= w.s && t < w.e + .05 ? ' now' : '')}>{w.w}</span>{' '}</React.Fragment>)}</div></div> : null}
-    {out !== null ? <Outro line={T0.outro.line} t={out} /> : null}
+    {out !== null ? <Outro line={T0.outro.line} follow={T0.outro.follow} t={out} /> : null}
   </AbsoluteFill>;
 }
 // every timeline prep.js writes registers itself as a composition
