@@ -1,0 +1,40 @@
+# Episode ideas
+
+Pick one and run `node v3/tools/write.js "<brief>"`.
+
+## 2026-11-02
+
+- **Every cover letter starts "I am excited to apply"**: Nia has 6 job applications due Friday, and all of her drafts sound like the same generic template. Fix: give an example of her own writing, ask it to ask questions first, project instructions.
+- **Explaining your thesis for the ninth time**: Three weeks before submission, Nia has opened a new chat 9 days running and retyped her topic, her supervisor's feedback and her word limit every time. Fix: Projects, project files, project instructions.
+- **Message 214 and it forgot the budget**: Nia is 214 messages into planning her sister's wedding, and Claude has started suggesting venues that are $4,000 over the limit she set on day one. Fix: ask for a handoff summary, start a fresh chat, put the summary in a Project.
+- **Fourteen screenshots of one spreadsheet**: The rent split for 4 flatmates is due Monday, and Nia has pasted 14 cropped screenshots of a spreadsheet instead of sending the file. Fix: upload the actual file, ask for an artifact calculator, give an example of the output she wants.
+- **The pitch is in your head, not on the page**: Nia has a 20-minute walk home and a pitch at 9 a.m. tomorrow, and she's planning to type out every idea once she gets in. Fix: voice mode, ask for a structured outline, turn it into an artifact.
+- **Last year's rules, this year's deadline**: Nia's grant application closes in 30 days, and she's following eligibility rules Claude gave her from memory without checking whether they changed. Fix: web search, ask for sources, ask it to flag anything it isn't sure about.
+- **Copying 40 emails into a chat by hand**: Nia's tenancy hearing with her landlord is on Thursday, and she's pasting 40 emails one at a time to build a timeline. Fix: Gmail connector, ask for a dated timeline artifact, ask it to point out gaps in the evidence.
+- **It rewrote 12 files you never mentioned**: Nia's portfolio site goes live in 48 hours, and one vague request to Claude Code just changed 12 files at once. Fix: Claude Code plan mode, review the plan before approving it, a CLAUDE.md with project rules.
+- **Re-reading your notes isn't revising**: Nia's exam is in 5 days, and she has read the same 60 pages of notes 3 times without testing herself once. Fix: upload notes to a Project, ask Claude to quiz her one question at a time, flashcard artifact.
+- **Five people, one deck, zero owners**: A group presentation is due in 36 hours, and the 5-person group chat has 300 messages but no one knows who is doing which slides. Fix: paste the chat, ask it to split tasks with deadlines, share a tracker artifact.
+- **Hitting the limit because of your own follow-ups**: At 2 a.m. Nia hits her usage limit after sending 25 "no, shorter" follow-ups on one paragraph. Fix: edit the original message instead of piling on corrections, give an example, start a new chat with a handoff summary.
+- **Asking for 15% more and freezing**: Nia's offer call is in 2 hours, and she wants to ask for 15% more but goes blank every time she says it out loud. Fix: role-play the call in voice mode, web search for salary ranges, ask it to ask questions first.
+
+## 2026-11-02 · vibe coders who build apps by prompting
+
+- **Your API key is on GitHub right now**: Nia pushed her side project to a public repo at 1 a.m., and her `.env` file with 3 live API keys went up with it. Fix: Claude Code to scan the repo for secrets, have it set up `.gitignore` and rotate the keys, a CLAUDE.md rule to never commit secrets.
+- **It worked on localhost**: Nia's demo is in 2 hours, the deploy has failed 6 times, and she keeps sending Claude a blurry screenshot of the error. Fix: paste the full build log as text, have Claude Code read the logs, ask it to explain the cause before it changes anything.
+- **Fixed the button, broke the login**: Nia's app has 40 beta users, and every fix Claude makes breaks something that worked yesterday because there are no tests and no commits. Fix: Claude Code to write tests first, commit before every change, review the diff before accepting.
+- **The whole app in one prompt**: Nia saw a TikTok idea, typed one prompt, and now has 2,000 lines of code she can't read and a launch she promised for Saturday. Fix: Claude Code plan mode, build one feature at a time, ask it to explain each file in plain English.
+- **Claude is coding for last year's version**: Nia's build throws 12 errors because Claude keeps writing code for an older version of her framework. Fix: tell it the exact versions, web search the current docs, add the stack and versions to CLAUDE.md.
+- **Anyone can read your users' data**: Nia's waitlist app has 300 signups, and she has never checked who can read her database. Fix: Claude Code `/security-review`, ask it to flag anything it isn't sure about, review the plan before it changes the database rules.
+- **Three weeks of building, zero signups**: Nia's app has been live for 21 days with 0 users, and she's about to spend another weekend adding features. Fix: ask Claude to ask questions first, web search for competitors and where her users actually hang out, landing page variations as artifacts.
+- **400 words to describe one button**: Nia has spent 45 minutes describing the design she wants in text, and every version still looks wrong. Fix: upload a screenshot of a site she likes as an example, prototype the screen as an artifact first, then send it to Claude Code.
+
+## 2026-11-02 · doom scrollers who lose hours to their phone and use Claude
+
+- **900 saved reels and you've cooked none of them**: Nia has saved 900 recipe and workout reels "for later", her food budget runs out in 9 days, and she still orders takeaway every night. Fix: paste the 15 she actually remembers, ask it to ask questions first, a weekly meal and grocery plan as an artifact.
+- **Asking how to quit your phone, from your phone, at 1 a.m.**: For 12 nights straight Nia has opened a new chat asking how to stop doom scrolling, and every night she gets the same generic tips because Claude never knows what she already tried. Fix: a Project with her screen time numbers and failed attempts as project files, project instructions, ask it to ask questions first.
+- **Two hours of "how to write an essay fast" videos**: Nia's 3,000-word essay is due in 10 hours, and she has spent the first 2 of them watching other people explain how to write one. Fix: give an example of her past writing, ask it to ask questions first, build the outline as an artifact and fill one section at a time.
+- **Three weeks of reviews for one laptop**: The sale on the $1,200 laptop Nia wants ends Sunday, and she has watched 60 TikTok reviews without checking whether it runs the software her course needs. Fix: give it her real requirements, web search with sources, a side-by-side comparison artifact.
+- **The comment section is not a doctor**: Nia has spent an hour reading comments under a viral reel and has $80 of supplements in her basket that she's about to buy. Fix: web search, ask for sources, ask it to flag anything it isn't sure about.
+- **A $300 course because of one TikTok**: Nia saved 40 videos about "faceless YouTube channels", and the checkout page for a $300 course has been open in a tab for 2 days. Fix: ask it to ask questions first, web search for real numbers and the creator's track record, a first-week plan as an artifact that costs nothing.
+- **Scrolling job posts is not applying**: Rent is due in 3 weeks, and Nia has spent 3 hours a night scrolling job listings with 0 applications sent. Fix: a Project with her CV and criteria in the project instructions, web search for matching roles, ask for a tailored draft and give an example of her own writing.
+- **Fourteen "day in my life" reels instead of planning yours**: Nia has 9 tasks due tomorrow, and it's midnight because she watched 14 strangers plan their days. Fix: voice mode for a 2-minute brain dump, ask it to prioritise with deadlines, tomorrow's plan as an artifact.
