@@ -103,7 +103,7 @@ if tl.get("music"):
     # carve a pocket for the voices instead of burying the music: drop the sub-bass phones can't play,
     # dip the speech presence band, lift the sparkle that phone speakers do play
     for c in (0, 1): m[:, c] = f(f(f(m[:, c], "hp", 90), "peak", 1600, q=.7, gain=-4.5), "peak", 6500, q=.8, gain=2.5)
-    m = m / (np.sqrt(np.mean(m ** 2)) + 1e-9) * .048          # heard but behind: ~11 dB under the dialogue in gaps, ~15 dB while talking
+    m = m / (np.sqrt(np.mean(m ** 2)) + 1e-9) * .030          # heard but behind: ~15 dB under the dialogue in gaps, ~19 dB while talking
     tduck = 1 - .4 * np.clip(sc / .05, 0, 1)                   # dips while anyone talks, swells in the gaps
     ml, mr = m[:, 0] * tduck, m[:, 1] * tduck
 
