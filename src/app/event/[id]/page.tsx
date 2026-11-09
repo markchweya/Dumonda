@@ -85,6 +85,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const completed = tasks.filter((t) => t.status === "completed" || t.status === "not_applicable").length;
   const def = getEventType(event.eventType);
   const facts = event.facts;
+  const eventDate = facts.event_date ? new Date(facts.event_date) : null;
+  const windowStartIso =
+    eventDate && !isNaN(eventDate.getTime()) ? eventDate.toISOString() : (event.createdAt?.toISOString() ?? null);
   const factSummary = [
     facts.canton ? cantonLabel(facts.canton) : null,
     facts.origin_canton ? `from ${cantonLabel(facts.origin_canton)}` : null,
@@ -192,7 +195,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               </div>
               <div className="mt-3 space-y-3">
                 {sectionTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} signedIn={!!session.userId} locale={locale} />
+                  <TaskCard key={task.id} task={task} signedIn={!!session.userId} locale={locale} windowStartIso={windowStartIso} />
                 ))}
               </div>
             </section>

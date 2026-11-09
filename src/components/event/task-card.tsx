@@ -23,14 +23,26 @@ export interface TaskView {
   sources: SourceInfo[];
 }
 
+function sourceDomain(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 export function TaskCard({
   task,
   signedIn = false,
   locale = "en",
+  windowStartIso = null,
 }: {
   task: TaskView;
   signedIn?: boolean;
   locale?: Locale;
+  /** Start of the deadline window (the event date, falling back to checklist creation) for the meter. */
+  windowStartIso?: string | null;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(task.status);
@@ -63,6 +75,27 @@ export function TaskCard({
   const notApplicable = status === "not_applicable";
   const allVerified = task.sources.length > 0 && task.sources.every((s) => s.verification === "verified");
   const hasSources = task.sources.length > 0;
+  const firstSourceDomain = hasSources ? sourceDomain(task.sources[0].url) : null;
+
+  // Deadline meter: fill = share of the window still left, anchored on when the checklist was created.
+  const deadline = task.deadlineIso ? new Date(task.deadlineIso) : null;
+  const daysLeft = deadline ? Math.ceil((deadline.getTime() - Date.now()) / 86_400_000) : null;
+  let meterPct: number | null = null;
+  if (deadline && windowStartIso) {
+    const total = deadline.getTime() - new Date(windowStartIso).getTime();
+    if (total > 0) meterPct = Math.max(4, Math.min(100, Math.round(((deadline.getTime() - Date.now()) / total) * 100)));
+  }
+  const deadlineText =
+    daysLeft === null
+      ? null
+      : daysLeft < 0
+        ? t(locale, "task.overdue")
+        : daysLeft === 0
+          ? t(locale, "task.dueToday")
+          : daysLeft >= 14
+            ? t(locale, "task.weeksLeft", { n: Math.round(daysLeft / 7) })
+            : t(locale, "task.daysLeft", { n: daysLeft });
+  const urgent = daysLeft !== null && daysLeft < 7;
 
   async function setTaskStatus(next: TaskView["status"]) {
     if (saving) return;
@@ -105,13 +138,35 @@ export function TaskCard({
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{task.description}</p>
 
+          {deadline && deadlineText && (
+            <div className="mt-3 rounded-xl border border-line bg-paper px-3.5 py-2.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{t(locale, "task.yourDeadline")}</p>
+              <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-sm">
+                <span className={cn("inline-flex items-center gap-1.5 font-semibold", urgent ? "text-accent" : "text-ink")}>
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {deadlineText}
+                </span>
+                <span className="text-xs text-ink-soft">
+                  {deadline.toLocaleDateString(locale === "en" ? "en-CH" : `${locale}-CH`, { day: "numeric", month: "long", year: "numeric" })}
+                  {task.deadlineLabel ? ` · ${task.deadlineLabel}` : ""}
+                </span>
+              </p>
+              {meterPct !== null && (
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
+                  <div
+                    className={cn("h-full rounded-full transition-[width]", urgent ? "bg-accent" : "bg-verified")}
+                    style={{ width: `${meterPct}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-3 flex flex-col gap-1.5 text-xs text-ink-soft">
-            {(task.deadlineIso || task.deadlineLabel) && (
+            {!deadline && task.deadlineLabel && (
               <span className="inline-flex items-center gap-1.5">
                 <CalendarClock className="h-3.5 w-3.5" />
-                {task.deadlineIso
-                  ? `${new Date(task.deadlineIso).toLocaleDateString("en-CH", { day: "numeric", month: "long", year: "numeric" })}${task.deadlineLabel ? ` (${task.deadlineLabel})` : ""}`
-                  : task.deadlineLabel}
+                {task.deadlineLabel}
               </span>
             )}
             {task.authorityName && (
@@ -134,7 +189,7 @@ export function TaskCard({
                 type="button"
                 onClick={() => setDrawerOpen(true)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 font-medium cursor-pointer transition-colors",
+                  "inline-flex flex-wrap items-center justify-start gap-1.5 text-left font-medium cursor-pointer transition-colors",
                   allVerified ? "text-verified hover:opacity-80" : "text-amber-ink hover:opacity-80",
                 )}
               >
@@ -146,6 +201,7 @@ export function TaskCard({
                     : task.sources[0].verification === "pending_review"
                       ? t(locale, "source.pending")
                       : verificationLabel(task.sources[0].verification).label}
+                {firstSourceDomain && <span className="font-normal text-ink-soft">· {firstSourceDomain}</span>}
               </button>
             )}
             {task.officialUrl && (
@@ -153,9 +209,9 @@ export function TaskCard({
                 href={task.officialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-ink underline underline-offset-4 hover:text-ink-soft"
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent/90"
               >
-                {t(locale, "task.openOfficial")}
+                {t(locale, "task.openOfficial")} →
               </a>
             )}
             <Link
